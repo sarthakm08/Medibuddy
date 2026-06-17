@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -7,10 +7,34 @@ import { analyzeXray, AnalyzeXrayOutput } from '@/ai/flows/analyze-xray-flow';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 
-export function XrayAnalyzer() {
+interface XrayAnalyzerProps {
+  initialImage?: string | null;
+}
+
+export function XrayAnalyzer({ initialImage }: XrayAnalyzerProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalyzeXrayOutput | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialImage) {
+      setPreview(initialImage);
+      performAnalysis(initialImage);
+    }
+  }, [initialImage]);
+
+  const performAnalysis = async (dataUri: string) => {
+    setIsAnalyzing(true);
+    setResult(null);
+    try {
+      const analysis = await analyzeXray({ xrayDataUri: dataUri });
+      setResult(analysis);
+    } catch (error) {
+      console.error('X-ray analysis error:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -20,17 +44,7 @@ export function XrayAnalyzer() {
     reader.onload = async (event) => {
       const dataUri = event.target?.result as string;
       setPreview(dataUri);
-      setIsAnalyzing(true);
-      setResult(null);
-      
-      try {
-        const analysis = await analyzeXray({ xrayDataUri: dataUri });
-        setResult(analysis);
-      } catch (error) {
-        console.error('X-ray analysis error:', error);
-      } finally {
-        setIsAnalyzing(false);
-      }
+      performAnalysis(dataUri);
     };
     reader.readAsDataURL(file);
   };

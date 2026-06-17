@@ -22,6 +22,8 @@ export type ExtractMedicalReportInsightsInput = z.infer<
 >;
 
 const ExtractMedicalReportInsightsOutputSchema = z.object({
+  isXray: z.boolean().describe('True if the uploaded file appears to be a skeletal X-ray image rather than a text report.'),
+  message: z.string().describe('A summary message explaining what was found or why information could not be extracted.'),
   medications: z
     .array(
       z.object({
@@ -59,15 +61,17 @@ const prompt = ai.definePrompt({
   name: 'extractMedicalReportInsightsPrompt',
   input: { schema: ExtractMedicalReportInsightsInputSchema },
   output: { schema: ExtractMedicalReportInsightsOutputSchema },
-  prompt: `You are an expert medical assistant trained to extract key medical information from patient reports.
+  prompt: `You are an expert medical assistant. Analyze the provided file.
 
-Your task is to carefully analyze the provided medical report and extract all relevant medications, their dosages, frequencies, and any associated treatment timelines.
+File: {{media url=medicalReportDataUri}}
 
-Pay close attention to detail and accurately parse complex medical jargon. If specific information is not available (e.g., end date for a treatment), you can omit that field.
+Instructions:
+1. **Detect File Type**: If the image is a skeletal X-ray, set 'isXray' to true.
+2. **Extraction**: If it's a report, extract all medications and treatment timelines.
+3. **Fallback Message**: If the file is unreadable, blurry, or contains no medical information, explain this clearly in the 'message' field (e.g., "I couldn't find any medications or treatment plans in this document. Please ensure the scan is clear.").
+4. If it IS an X-ray, set 'isXray' to true and set 'message' to "This looks like an X-ray. I am redirecting you to the X-ray Analyzer."
 
-Medical Report: {{media url=medicalReportDataUri}}
-
-Extract the information in a structured JSON format according to the output schema provided.`,
+Be precise. If information is missing, do not hallucinate; use the 'message' field to inform the user.`,
 });
 
 const extractMedicalReportInsightsFlow = ai.defineFlow(

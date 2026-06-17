@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pill, Calendar, Info, ShieldAlert, Download, HeartPulse, ClipboardList, Activity, Stethoscope, ChevronRight, Apple, Loader2, X } from 'lucide-react';
+import { Pill, Calendar, Info, ShieldAlert, Download, HeartPulse, ClipboardList, Activity, Stethoscope, ChevronRight, Apple, Loader2, X, AlertCircle } from 'lucide-react';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
 import { analyzeMedicationInteractions, AnalyzeMedicationInteractionsOutput } from '@/ai/flows/analyze-medication-interactions';
 import { suggestDietPlan, DietPlanOutput } from '@/ai/flows/suggest-diet-plan-flow';
@@ -94,6 +94,17 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
           </Button>
         </div>
       </div>
+
+      {/* AI Summary Message */}
+      {insights.message && (
+        <Alert className="bg-primary/5 border-primary/20 animate-in fade-in duration-700">
+          <AlertCircle className="h-4 w-4 text-primary" />
+          <AlertTitle className="text-sm font-bold">Assistant Summary</AlertTitle>
+          <AlertDescription className="text-sm">
+            {insights.message}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-4 max-w-3xl no-print bg-muted/30 p-1 mb-8 h-auto">
@@ -188,15 +199,19 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
-                  {insights.treatmentTimelines.map((timeline, idx) => (
-                    <div key={idx} className="relative pl-7 pb-8 border-l-2 border-accent/20 last:border-0 last:pb-0">
-                      <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-accent border-4 border-background" />
-                      <div className="space-y-1.5 p-4 bg-white rounded-xl shadow-sm border border-accent/5">
-                        <h4 className="text-sm font-bold">{timeline.condition}</h4>
-                        <p className="text-xs text-muted-foreground">{timeline.startDate} → {timeline.endDate || 'Ongoing'}</p>
+                  {insights.treatmentTimelines.length > 0 ? (
+                    insights.treatmentTimelines.map((timeline, idx) => (
+                      <div key={idx} className="relative pl-7 pb-8 border-l-2 border-accent/20 last:border-0 last:pb-0">
+                        <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-accent border-4 border-background" />
+                        <div className="space-y-1.5 p-4 bg-white rounded-xl shadow-sm border border-accent/5">
+                          <h4 className="text-sm font-bold">{timeline.condition}</h4>
+                          <p className="text-xs text-muted-foreground">{timeline.startDate} → {timeline.endDate || 'Ongoing'}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground italic">No timelines found.</div>
+                  )}
                 </ScrollArea>
               </CardContent>
             </Card>

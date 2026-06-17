@@ -29,6 +29,7 @@ export default function MedibuddyHome() {
   const [insights, setInsights] = useState<ExtractMedicalReportInsightsOutput | null>(null);
   const [activeTab, setActiveTab] = useState('profile');
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [prefilledXrayUri, setPrefilledXrayUri] = useState<string | null>(null);
   
   // Theme Toggle State
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -61,7 +62,14 @@ export default function MedibuddyHome() {
 
   const handleInsights = (data: ExtractMedicalReportInsightsOutput) => {
     setInsights(data);
-    setActiveTab('analysis');
+    if (data.medications.length > 0 || data.treatmentTimelines.length > 0) {
+      setActiveTab('analysis');
+    }
+  };
+
+  const handleXrayDetected = (uri: string) => {
+    setPrefilledXrayUri(uri);
+    setActiveTab('xray');
   };
 
   if (!mounted) return null;
@@ -159,7 +167,7 @@ export default function MedibuddyHome() {
                   <PatientProfile data={patientData} onChange={setPatientData} />
                 </div>
                 <div className="lg:col-span-5 flex flex-col gap-6">
-                  <ReportUploader onInsightsExtracted={handleInsights} />
+                  <ReportUploader onInsightsExtracted={handleInsights} onXrayDetected={handleXrayDetected} />
                   
                   <div className={`p-6 rounded-2xl border bg-card/50 backdrop-blur-sm transition-all duration-500 flex items-center justify-between ${insights ? 'opacity-100' : 'opacity-40 grayscale'}`}>
                     <div className="flex items-center gap-4">
@@ -188,7 +196,7 @@ export default function MedibuddyHome() {
             </TabsContent>
 
             <TabsContent value="xray" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
-              <XrayAnalyzer />
+              <XrayAnalyzer initialImage={prefilledXrayUri} />
             </TabsContent>
           </Tabs>
         </div>
