@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, Activity, AlertCircle, Phone, History, Venus, Mars, MapPin } from 'lucide-react';
+import { User, Activity, AlertCircle, Phone, History, Venus, Mars, MapPin, Camera, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 export interface PatientData {
   name: string;
@@ -17,6 +19,7 @@ export interface PatientData {
   allergies: string;
   chronicConditions: string;
   accidentHistory: string;
+  profilePhoto?: string;
 }
 
 interface PatientProfileProps {
@@ -25,6 +28,8 @@ interface PatientProfileProps {
 }
 
 export function PatientProfile({ data, onChange }: PatientProfileProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     onChange({ ...data, [name]: value });
@@ -32,6 +37,22 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
 
   const handleSelectChange = (name: string, value: string) => {
     onChange({ ...data, [name]: value });
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        onChange({ ...data, profilePhoto: event.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = () => {
+    onChange({ ...data, profilePhoto: undefined });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
@@ -44,6 +65,45 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
         <CardDescription>Enter your personalized health parameters to ensure accurate medication safety analysis.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Profile Photo Section */}
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-full border-4 border-primary/10 overflow-hidden bg-muted flex items-center justify-center relative shadow-inner">
+              {data.profilePhoto ? (
+                <Image src={data.profilePhoto} alt="Profile" fill className="object-cover" />
+              ) : (
+                <User className="w-16 h-16 text-muted-foreground/40" />
+              )}
+            </div>
+            {data.profilePhoto && (
+              <Button 
+                variant="destructive" 
+                size="icon" 
+                className="absolute -top-1 -right-1 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={removePhoto}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            )}
+            <Button 
+              size="icon" 
+              variant="secondary" 
+              className="absolute bottom-0 right-0 rounded-full shadow-lg border-2 border-background"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Camera className="w-4 h-4" />
+            </Button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handlePhotoUpload} 
+            />
+          </div>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Profile Photo</p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>

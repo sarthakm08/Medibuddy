@@ -7,13 +7,16 @@ import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { XrayAnalyzer } from '@/components/xray-analyzer';
 import { SymptomChecker } from '@/components/symptom-checker';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
-import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle, Moon, Sun, ClipboardCheck } from 'lucide-react';
+import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle, Moon, Sun, ClipboardCheck, User } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 export default function MedibuddyHome() {
+  const { toast } = useToast();
   const [patientData, setPatientData] = useState<PatientData>({
     name: '',
     age: '',
@@ -24,7 +27,8 @@ export default function MedibuddyHome() {
     address: '',
     allergies: '',
     chronicConditions: '',
-    accidentHistory: ''
+    accidentHistory: '',
+    profilePhoto: undefined
   });
 
   const [insights, setInsights] = useState<ExtractMedicalReportInsightsOutput | null>(null);
@@ -73,6 +77,19 @@ export default function MedibuddyHome() {
     setActiveTab('xray');
   };
 
+  const handleTabChange = (value: string) => {
+    if (value === 'analysis' && !insights) {
+      toast({
+        title: "Medical Report Required",
+        description: "Kindly upload a medical report first.",
+        variant: "destructive",
+      });
+      setActiveTab('profile'); // Ensure they stay/redirect to the uploader tab
+      return;
+    }
+    setActiveTab(value);
+  };
+
   if (!mounted) return null;
 
   return (
@@ -100,8 +117,14 @@ export default function MedibuddyHome() {
 
             <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5 text-primary font-bold">
-                  <UserCircle className="w-5 h-5" />
+                <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5 text-primary font-bold overflow-hidden p-1 pr-3">
+                  <div className="relative w-8 h-8 rounded-full bg-muted overflow-hidden flex items-center justify-center shrink-0 border border-primary/10">
+                    {patientData.profilePhoto ? (
+                      <Image src={patientData.profilePhoto} alt="Profile" fill className="object-cover" />
+                    ) : (
+                      <UserCircle className="w-6 h-6" />
+                    )}
+                  </div>
                   <span className="hidden sm:inline">Profile</span>
                 </Button>
               </DialogTrigger>
@@ -139,7 +162,7 @@ export default function MedibuddyHome() {
         </section>
 
         <div className="grid grid-cols-1 gap-8">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto mb-12 no-print bg-card p-1 rounded-xl shadow-sm border h-14">
               <TabsTrigger 
                 value="profile" 
@@ -149,8 +172,7 @@ export default function MedibuddyHome() {
               </TabsTrigger>
               <TabsTrigger 
                 value="analysis" 
-                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all" 
-                disabled={!insights}
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
               >
                 <Stethoscope className="w-4 h-4" /> Health Analysis
               </TabsTrigger>
@@ -207,6 +229,7 @@ export default function MedibuddyHome() {
             </TabsContent>
 
             <TabsContent value="symptoms" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+              <ClipboardCheck className="w-4 h-4" /> Symptom Checker
               <SymptomChecker />
             </TabsContent>
           </Tabs>
