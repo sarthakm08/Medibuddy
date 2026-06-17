@@ -41,7 +41,7 @@ interface Reminder {
   type: 'pill' | 'syrup';
   amount: string;
   time: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   taken: boolean;
 }
 
@@ -147,7 +147,7 @@ export function MedicineReminder() {
       type: formData.type,
       amount: formData.amount,
       time: formData.time,
-      imageUrl: formData.image || undefined,
+      imageUrl: formData.image || null,
       taken: false,
       userId: userId
     };

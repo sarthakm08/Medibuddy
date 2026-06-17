@@ -51,7 +51,7 @@ const INITIAL_PATIENT_DATA: PatientData = {
   allergies: '',
   chronicConditions: '',
   accidentHistory: '',
-  profilePhoto: undefined
+  profilePhoto: null
 };
 
 export default function MedibuddyHome() {
@@ -133,12 +133,21 @@ export default function MedibuddyHome() {
   const handleProfileChange = (updatedData: PatientData) => {
     setPatientData(updatedData);
     if (profileRef) {
-      setDoc(profileRef, updatedData, { merge: true })
+      // Clean data for Firestore: Firestore does not support 'undefined'
+      const dataToSave = { ...updatedData };
+      Object.keys(dataToSave).forEach(key => {
+        const k = key as keyof PatientData;
+        if (dataToSave[k] === undefined) {
+          dataToSave[k] = null as any;
+        }
+      });
+
+      setDoc(profileRef, dataToSave, { merge: true })
         .catch(async (error) => {
           const permissionError = new FirestorePermissionError({
             path: profileRef.path,
             operation: 'update',
-            requestResourceData: updatedData,
+            requestResourceData: dataToSave,
           });
           errorEmitter.emit('permission-error', permissionError);
         });

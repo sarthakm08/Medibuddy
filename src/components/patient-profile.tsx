@@ -20,7 +20,7 @@ export interface PatientData {
   allergies: string;
   chronicConditions: string;
   accidentHistory: string;
-  profilePhoto?: string;
+  profilePhoto?: string | null;
 }
 
 interface PatientProfileProps {
@@ -52,7 +52,7 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
   };
 
   const removePhoto = () => {
-    onChange({ ...data, profilePhoto: undefined });
+    onChange({ ...data, profilePhoto: null });
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
