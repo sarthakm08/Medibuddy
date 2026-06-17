@@ -1,0 +1,51 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Patient's basic health and identity information.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "age": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "sex": { "type": "string" },
+        "weight": { "type": "string" },
+        "height": { "type": "string" },
+        "address": { "type": "string" },
+        "allergies": { "type": "string" },
+        "chronicConditions": { "type": "string" },
+        "accidentHistory": { "type": "string" },
+        "profilePhoto": { "type": "string" }
+      }
+    },
+    "Reminder": {
+      "title": "Medicine Reminder",
+      "description": "Information about scheduled medications.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["pill", "syrup"] },
+        "amount": { "type": "string" },
+        "time": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "taken": { "type": "boolean" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "amount", "time"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores individual user profile data."
+    },
+    "/users/{userId}/reminders/{reminderId}": {
+      "schema": "Reminder",
+      "description": "Stores medicine reminders for a specific user."
+    }
+  }
+}

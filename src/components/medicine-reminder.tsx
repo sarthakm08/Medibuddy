@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+
+'use client';
+
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +30,10 @@ import {
 import Image from 'next/image';
 import { detectMedicine } from '@/ai/flows/detect-medicine-flow';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore, useCollection, useUser } from '@/firebase';
+import { collection, doc, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 interface Reminder {
   id: string;
@@ -40,7 +47,18 @@ interface Reminder {
 
 export function MedicineReminder() {
   const { toast } = useToast();
-  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const userId = user?.uid || 'demo-user';
+
+  // Use Firestore for persistence
+  const remindersCollection = useMemo(() => 
+    firestore ? collection(firestore, 'users', userId, 'reminders') : null, 
+    [firestore, userId]
+  );
+  
+  const { data: reminders = [] } = useCollection(remindersCollection);
+
   const [isDetecting, setIsDetecting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -123,34 +141,67 @@ export function MedicineReminder() {
       });
       return;
     }
-    const newReminder: Reminder = {
-      id: Math.random().toString(36).substr(2, 9),
+
+    const newReminder = {
       name: formData.name,
       type: formData.type,
       amount: formData.amount,
       time: formData.time,
       imageUrl: formData.image || undefined,
-      taken: false
+      taken: false,
+      userId: userId
     };
-    setReminders([...reminders, newReminder]);
-    setFormData({ name: '', type: 'pill', amount: '', time: '', image: null });
-    toast({
-      title: "Reminder Added",
-      description: `${newReminder.name} scheduled for ${newReminder.time}.`,
-    });
+
+    if (remindersCollection) {
+      addDoc(remindersCollection, newReminder)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: remindersCollection.path,
+            operation: 'create',
+            requestResourceData: newReminder,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
+      
+      setFormData({ name: '', type: 'pill', amount: '', time: '', image: null });
+      toast({
+        title: "Reminder Added",
+        description: `${newReminder.name} scheduled for ${newReminder.time}.`,
+      });
+    }
   };
 
   const deleteReminder = (id: string) => {
-    setReminders(reminders.filter(r => r.id !== id));
+    if (remindersCollection) {
+      const docRef = doc(remindersCollection, id);
+      deleteDoc(docRef)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'delete',
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
+    }
   };
 
-  const toggleTaken = (id: string) => {
-    setReminders(reminders.map(r => r.id === id ? { ...r, taken: !r.taken } : r));
+  const toggleTaken = (id: string, currentStatus: boolean) => {
+    if (remindersCollection) {
+      const docRef = doc(remindersCollection, id);
+      updateDoc(docRef, { taken: !currentStatus })
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'update',
+            requestResourceData: { taken: !currentStatus },
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
+    }
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-500">
-      {/* Smart Controls & Stats */}
       <div className="lg:col-span-4 space-y-6">
         <Card className="border-none shadow-sm bg-primary text-primary-foreground overflow-hidden">
           <CardHeader>
@@ -288,7 +339,6 @@ export function MedicineReminder() {
         </Card>
       </div>
 
-      {/* Reminders List */}
       <Card className="lg:col-span-8 border-none shadow-sm bg-card/50 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-lg font-headline flex items-center justify-between">
@@ -322,7 +372,7 @@ export function MedicineReminder() {
                       variant={r.taken ? 'secondary' : 'default'} 
                       size="sm" 
                       className={`h-8 gap-1.5 ${r.taken ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}`}
-                      onClick={() => toggleTaken(r.id)}
+                      onClick={() => toggleTaken(r.id, r.taken)}
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       {r.taken ? 'Taken' : 'Mark Taken'}

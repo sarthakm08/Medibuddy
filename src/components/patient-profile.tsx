@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -55,6 +56,13 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // Helper to prevent non-integer input for age and weight
+  const preventNonInteger = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === '.' || e.key === 'e' || e.key === '-' || e.key === '+') {
+      e.preventDefault();
+    }
+  };
+
   return (
     <Card className="shadow-sm border-none bg-card/50 backdrop-blur-sm">
       <CardHeader className="pb-4">
@@ -65,7 +73,6 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
         <CardDescription>Enter your personalized health parameters to ensure accurate medication safety analysis.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Profile Photo Section */}
         <div className="flex flex-col items-center gap-4 mb-6">
           <div className="relative group">
             <div className="w-32 h-32 rounded-full border-4 border-primary/10 overflow-hidden bg-muted flex items-center justify-center relative shadow-inner">
@@ -120,7 +127,17 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="age">Age</Label>
-            <Input id="age" name="age" type="number" value={data.age} onChange={handleChange} placeholder="35" />
+            <Input 
+              id="age" 
+              name="age" 
+              type="number" 
+              min="1" 
+              step="1" 
+              onKeyDown={preventNonInteger}
+              value={data.age} 
+              onChange={handleChange} 
+              placeholder="35" 
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="sex" className="flex items-center gap-1">
@@ -141,7 +158,17 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
             <Label htmlFor="weight" className="flex items-center gap-1">
               <Activity className="w-3 h-3" /> Weight (kg)
             </Label>
-            <Input id="weight" name="weight" type="number" value={data.weight} onChange={handleChange} placeholder="70" />
+            <Input 
+              id="weight" 
+              name="weight" 
+              type="number" 
+              min="1" 
+              step="1" 
+              onKeyDown={preventNonInteger}
+              value={data.weight} 
+              onChange={handleChange} 
+              placeholder="70" 
+            />
           </div>
         </div>
 

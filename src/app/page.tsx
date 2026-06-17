@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PatientProfile, PatientData } from '@/components/patient-profile';
 import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
@@ -34,29 +35,49 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { useFirestore, useDoc, useUser } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+
+const INITIAL_PATIENT_DATA: PatientData = {
+  name: '',
+  age: '',
+  phoneNumber: '',
+  sex: '',
+  weight: '',
+  height: '',
+  address: '',
+  allergies: '',
+  chronicConditions: '',
+  accidentHistory: '',
+  profilePhoto: undefined
+};
 
 export default function MedibuddyHome() {
   const { toast } = useToast();
-  const [patientData, setPatientData] = useState<PatientData>({
-    name: '',
-    age: '',
-    phoneNumber: '',
-    sex: '',
-    weight: '',
-    height: '',
-    address: '',
-    allergies: '',
-    chronicConditions: '',
-    accidentHistory: '',
-    profilePhoto: undefined
-  });
+  const firestore = useFirestore();
+  const { user } = useUser();
+  
+  // Use a stable document reference for the user profile
+  const userId = user?.uid || 'demo-user';
+  const profileRef = useMemo(() => firestore ? doc(firestore, 'users', userId) : null, [firestore, userId]);
+  const { data: remoteProfile } = useDoc(profileRef);
+
+  const [patientData, setPatientData] = useState<PatientData>(INITIAL_PATIENT_DATA);
+
+  // Sync remote profile to local state when it changes
+  useEffect(() => {
+    if (remoteProfile) {
+      setPatientData(prev => ({ ...prev, ...remoteProfile }));
+    }
+  }, [remoteProfile]);
 
   const [insights, setInsights] = useState<ExtractMedicalReportInsightsOutput | null>(null);
   const [activeTab, setActiveTab] = useState('analyzer');
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [prefilledXrayUri, setPrefilledXrayUri] = useState<string | null>(null);
   
-  // Theme Toggle State
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
 
@@ -109,11 +130,25 @@ export default function MedibuddyHome() {
     setActiveTab(value);
   };
 
+  const handleProfileChange = (updatedData: PatientData) => {
+    setPatientData(updatedData);
+    if (profileRef) {
+      setDoc(profileRef, updatedData, { merge: true })
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: profileRef.path,
+            operation: 'update',
+            requestResourceData: updatedData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
+    }
+  };
+
   if (!mounted) return null;
 
   return (
     <div className="min-h-screen selection:bg-primary/20 bg-background">
-      {/* Navigation Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-md no-print shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('analyzer')}>
@@ -152,7 +187,7 @@ export default function MedibuddyHome() {
                   <DialogTitle className="text-2xl font-headline font-bold">User Information</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="max-h-[70vh] p-6 pt-2">
-                  <PatientProfile data={patientData} onChange={setPatientData} />
+                  <PatientProfile data={patientData} onChange={handleProfileChange} />
                 </ScrollArea>
                 <DialogFooter className="p-6 pt-2">
                   <Button onClick={() => setIsProfileDialogOpen(false)} className="w-full sm:w-auto">Save & Close</Button>
@@ -163,9 +198,7 @@ export default function MedibuddyHome() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
-        {/* Intro Section - No Print */}
         <section className="mb-12 no-print">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4 border border-primary/20">
@@ -306,10 +339,8 @@ export default function MedibuddyHome() {
         </div>
       </main>
 
-      {/* Floating Chatbot */}
       <RajuChatbot />
 
-      {/* Minimal Footer */}
       <footer className="border-t py-16 bg-card no-print">
         <div className="container mx-auto px-4 text-center">
           <p className="text-xs text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
