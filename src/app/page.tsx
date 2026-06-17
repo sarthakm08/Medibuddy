@@ -7,6 +7,7 @@ import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
 import { ShieldPlus, Heart, Stethoscope, ChevronRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 
 export default function MedibuddyHome() {
   const [patientData, setPatientData] = useState<PatientData>({
@@ -69,14 +70,14 @@ export default function MedibuddyHome() {
                 value="profile" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
               >
-                <Heart className="w-4 h-4" /> 1. Patient Profile
+                <Heart className="w-4 h-4" /> Patient Profile
               </TabsTrigger>
               <TabsTrigger 
                 value="analysis" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all" 
                 disabled={!insights}
               >
-                <Stethoscope className="w-4 h-4" /> 2. Health Analysis
+                <Stethoscope className="w-4 h-4" /> Health Analysis
               </TabsTrigger>
             </TabsList>
 
