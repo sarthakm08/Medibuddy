@@ -6,12 +6,11 @@ import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { XrayAnalyzer } from '@/components/xray-analyzer';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
-import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle, LayoutDashboard, Sparkles } from 'lucide-react';
+import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Link from 'next/link';
 
 export default function MedibuddyHome() {
   const [patientData, setPatientData] = useState<PatientData>({
@@ -49,13 +48,6 @@ export default function MedibuddyHome() {
           </div>
           
           <div className="flex items-center gap-4 md:gap-6">
-            <Link href="/advanced-features">
-              <Button variant="ghost" className="gap-2 text-primary font-bold hover:bg-primary/5 hidden sm:flex">
-                <Sparkles className="w-4 h-4" />
-                Advanced Features
-              </Button>
-            </Link>
-            
             <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5 text-primary font-bold">
