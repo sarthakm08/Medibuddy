@@ -2,9 +2,39 @@
   "placeholderImages": [
     {
       "id": "medical-hero",
-      "description": "Clean medical environment background",
-      "imageUrl": "https://picsum.photos/seed/med1/1200/400",
-      "imageHint": "medical laboratory"
+      "description": "Doctor talking to a patient in a bright office",
+      "imageUrl": "https://picsum.photos/seed/med-hero/1200/800",
+      "imageHint": "doctor patient conversation"
+    },
+    {
+      "id": "emergency-icon",
+      "description": "Ambulance icon",
+      "imageUrl": "https://picsum.photos/seed/emergency/400/400",
+      "imageHint": "ambulance icon"
+    },
+    {
+      "id": "pediatric-icon",
+      "description": "Teddy bear icon",
+      "imageUrl": "https://picsum.photos/seed/pediatric/400/400",
+      "imageHint": "teddy bear"
+    },
+    {
+      "id": "cardiology-icon",
+      "description": "Heart with pulse line",
+      "imageUrl": "https://picsum.photos/seed/heart/400/400",
+      "imageHint": "heart medical"
+    },
+    {
+      "id": "advanced-diagnostics",
+      "description": "MRI machine in diagnostic center",
+      "imageUrl": "https://picsum.photos/seed/diag/600/400",
+      "imageHint": "mri scanner"
+    },
+    {
+      "id": "specialized-surgeries",
+      "description": "Modern operating room",
+      "imageUrl": "https://picsum.photos/seed/surgery/600/400",
+      "imageHint": "operating room"
     }
   ]
 }
