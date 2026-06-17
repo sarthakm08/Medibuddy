@@ -6,22 +6,28 @@ import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { XrayAnalyzer } from '@/components/xray-analyzer';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
-import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan } from 'lucide-react';
+import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function MedibuddyHome() {
   const [patientData, setPatientData] = useState<PatientData>({
     name: '',
     age: '',
+    phoneNumber: '',
+    sex: '',
     weight: '',
     height: '',
     allergies: '',
-    chronicConditions: ''
+    chronicConditions: '',
+    accidentHistory: ''
   });
 
   const [insights, setInsights] = useState<ExtractMedicalReportInsightsOutput | null>(null);
   const [activeTab, setActiveTab] = useState('profile');
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 
   const handleInsights = (data: ExtractMedicalReportInsightsOutput) => {
     setInsights(data);
@@ -33,16 +39,39 @@ export default function MedibuddyHome() {
       {/* Navigation Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md no-print shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 group cursor-pointer">
+          <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('profile')}>
             <div className="p-2 bg-primary rounded-xl group-hover:rotate-12 transition-transform shadow-md shadow-primary/20">
               <ShieldPlus className="w-6 h-6 text-primary-foreground" />
             </div>
             <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">Medibuddy</h1>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-bold text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">How it works</a>
-            <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-            <a href="#" className="hover:text-primary transition-colors">Support</a>
+          
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="hidden md:flex items-center gap-8 text-sm font-bold text-muted-foreground">
+              <a href="#" className="hover:text-primary transition-colors">How it works</a>
+              <a href="#" className="hover:text-primary transition-colors">Privacy</a>
+              <a href="#" className="hover:text-primary transition-colors">Support</a>
+            </div>
+            
+            <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5 text-primary font-bold">
+                  <UserCircle className="w-5 h-5" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+                <DialogHeader className="p-6 pb-0">
+                  <DialogTitle className="text-2xl font-headline font-bold">User Information</DialogTitle>
+                </DialogHeader>
+                <ScrollArea className="max-h-[70vh] p-6 pt-2">
+                  <PatientProfile data={patientData} onChange={setPatientData} />
+                </ScrollArea>
+                <DialogFooter className="p-6 pt-2">
+                  <Button onClick={() => setIsProfileDialogOpen(false)} className="w-full sm:w-auto">Save & Close</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </header>
