@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,9 +19,14 @@ import {
   CheckCircle2, 
   Users, 
   Smartphone,
-  MessageCircle
+  MessageCircle,
+  Loader2,
+  Sparkles,
+  RefreshCw
 } from 'lucide-react';
 import Image from 'next/image';
+import { detectMedicine } from '@/ai/flows/detect-medicine-flow';
+import { useToast } from '@/hooks/use-toast';
 
 interface Reminder {
   id: string;
@@ -34,7 +39,9 @@ interface Reminder {
 }
 
 export function MedicineReminder() {
+  const { toast } = useToast();
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [isDetecting, setIsDetecting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     type: 'pill' as 'pill' | 'syrup',
@@ -64,8 +71,58 @@ export function MedicineReminder() {
     }
   };
 
+  const handleAIDetect = async () => {
+    if (!formData.image) {
+      toast({
+        title: "Photo Required",
+        description: "Please upload a photo of the medicine first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsDetecting(true);
+    try {
+      const result = await detectMedicine({ photoDataUri: formData.image });
+      if (result.detected) {
+        setFormData(prev => ({
+          ...prev,
+          name: result.name || prev.name,
+          type: result.type || prev.type,
+          amount: result.suggestedAmount || prev.amount
+        }));
+        toast({
+          title: "Medicine Detected",
+          description: `Successfully identified ${result.name}.`,
+        });
+      } else {
+        toast({
+          title: "Detection Failed",
+          description: "Could not clearly identify medicine from photo. Please enter manually.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "An error occurred during AI detection.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+
   const addReminder = () => {
-    if (!formData.name || !formData.amount || !formData.time) return;
+    if (!formData.name || !formData.amount || !formData.time) {
+      toast({
+        title: "Missing Info",
+        description: "Please fill in the medicine name, amount, and time.",
+        variant: "destructive"
+      });
+      return;
+    }
     const newReminder: Reminder = {
       id: Math.random().toString(36).substr(2, 9),
       name: formData.name,
@@ -77,6 +134,10 @@ export function MedicineReminder() {
     };
     setReminders([...reminders, newReminder]);
     setFormData({ name: '', type: 'pill', amount: '', time: '', image: null });
+    toast({
+      title: "Reminder Added",
+      description: `${newReminder.name} scheduled for ${newReminder.time}.`,
+    });
   };
 
   const deleteReminder = (id: string) => {
@@ -149,6 +210,34 @@ export function MedicineReminder() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
+              <Label className="text-xs">Medicine Picture</Label>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1 gap-2 border-dashed h-12"
+                  onClick={() => document.getElementById('med-img')?.click()}
+                >
+                  {formData.image ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Camera className="w-4 h-4" />}
+                  <span className="text-[10px]">{formData.image ? 'Change Photo' : 'Upload Label'}</span>
+                </Button>
+                {formData.image && (
+                  <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    className="h-12 w-12 shrink-0 bg-primary/10 text-primary hover:bg-primary/20"
+                    onClick={handleAIDetect}
+                    disabled={isDetecting}
+                    title="Detect info from label"
+                  >
+                    {isDetecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  </Button>
+                )}
+              </div>
+              <input id="med-img" type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-xs">Medicine Name</Label>
               <Input 
                 value={formData.name} 
@@ -157,6 +246,7 @@ export function MedicineReminder() {
                 className="h-8 text-xs"
               />
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label className="text-xs">Type</Label>
@@ -173,7 +263,6 @@ export function MedicineReminder() {
               <div className="space-y-2">
                 <Label className="text-xs">{formData.type === 'pill' ? 'Units' : 'ML'}</Label>
                 <Input 
-                  type="number"
                   value={formData.amount} 
                   onChange={e => setFormData({...formData, amount: e.target.value})}
                   placeholder="1"
@@ -181,6 +270,7 @@ export function MedicineReminder() {
                 />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label className="text-xs">Time</Label>
               <Input 
@@ -190,21 +280,9 @@ export function MedicineReminder() {
                 className="h-8 text-xs"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Medicine Picture</Label>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="w-full gap-2 border-dashed h-12"
-                onClick={() => document.getElementById('med-img')?.click()}
-              >
-                {formData.image ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Camera className="w-4 h-4" />}
-                <span className="text-[10px]">{formData.image ? 'Photo Selected' : 'Upload Photo'}</span>
-              </Button>
-              <input id="med-img" type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-            </div>
-            <Button className="w-full h-8 text-xs" onClick={addReminder}>
-              Add Reminder
+
+            <Button className="w-full h-10 gap-2" onClick={addReminder} disabled={isDetecting}>
+              <Plus className="w-4 h-4" /> Add to Schedule
             </Button>
           </CardContent>
         </Card>
