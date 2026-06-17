@@ -59,14 +59,12 @@ export default function MedibuddyHome() {
   const firestore = useFirestore();
   const { user } = useUser();
   
-  // Use a stable document reference for the user profile
   const userId = user?.uid || 'demo-user';
   const profileRef = useMemo(() => firestore ? doc(firestore, 'users', userId) : null, [firestore, userId]);
   const { data: remoteProfile } = useDoc(profileRef);
 
   const [patientData, setPatientData] = useState<PatientData>(INITIAL_PATIENT_DATA);
 
-  // Sync remote profile to local state when it changes
   useEffect(() => {
     if (remoteProfile) {
       setPatientData(prev => ({ ...prev, ...remoteProfile }));
@@ -133,7 +131,6 @@ export default function MedibuddyHome() {
   const handleProfileChange = (updatedData: PatientData) => {
     setPatientData(updatedData);
     if (profileRef) {
-      // Clean data for Firestore: Firestore does not support 'undefined'
       const dataToSave = { ...updatedData };
       Object.keys(dataToSave).forEach(key => {
         const k = key as keyof PatientData;
@@ -157,8 +154,8 @@ export default function MedibuddyHome() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen selection:bg-primary/20 bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-md no-print shadow-sm">
+    <div className="min-h-screen selection:bg-primary/20 bg-[#F7F8FA] dark:bg-background">
+      <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-card/80 backdrop-blur-md no-print shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('analyzer')}>
             <div className="p-2 bg-primary rounded-xl group-hover:rotate-12 transition-transform shadow-md shadow-primary/20">
@@ -180,7 +177,7 @@ export default function MedibuddyHome() {
 
             <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5 text-primary font-bold overflow-hidden p-1 pr-3">
+                <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5 text-primary font-bold overflow-hidden p-1 pr-3 rounded-full h-10">
                   <div className="relative w-8 h-8 rounded-full bg-muted overflow-hidden flex items-center justify-center shrink-0 border border-primary/10">
                     {patientData.profilePhoto ? (
                       <Image src={patientData.profilePhoto} alt="Profile" fill className="object-cover" />
@@ -207,123 +204,119 @@ export default function MedibuddyHome() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
-        <section className="mb-12 no-print">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4 border border-primary/20">
-              <ShieldPlus className="w-3 h-3" /> AI-Powered Health Companion
-            </div>
-            <h2 className="font-headline text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-foreground">
-              Your Intelligent <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Medical Assistant</span>
-            </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              Understand your health data better. Upload medical reports or X-rays to get structured summaries, medication tracking, and interactive safety analysis.
-            </p>
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <section className="mb-12 no-print text-center max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold mb-6 border border-primary/20 uppercase tracking-widest">
+            <ShieldPlus className="w-3 h-3" /> AI-Powered Health Companion
           </div>
+          <h2 className="font-headline text-4xl md:text-6xl font-extrabold mb-8 tracking-tight text-foreground leading-[1.1]">
+            Your Intelligent <span className="text-primary">Medical Assistant</span>
+          </h2>
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+            Understand your health data better. Upload medical reports or X-rays to get structured summaries, medication tracking, and interactive safety analysis.
+          </p>
         </section>
 
-        <div className="grid grid-cols-1 gap-8">
+        <div className="max-w-4xl mx-auto">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto mb-12 no-print bg-card p-1 rounded-xl shadow-sm border h-14">
+            <TabsList className="grid w-full grid-cols-5 bg-white dark:bg-card p-1 rounded-2xl shadow-sm border h-16 mb-12 no-print">
               <TabsTrigger 
                 value="analyzer" 
-                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl transition-all h-full"
               >
                 <FileSearch className="w-4 h-4" /> Analyzer
               </TabsTrigger>
               <TabsTrigger 
                 value="analysis" 
-                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl transition-all h-full"
               >
                 <Stethoscope className="w-4 h-4" /> Analysis
               </TabsTrigger>
               <TabsTrigger 
                 value="xray" 
-                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl transition-all h-full"
               >
-                <Scan className="w-4 h-4" /> X-ray
+                <Scan className="w-4 h-4" /> Xray
               </TabsTrigger>
               <TabsTrigger 
                 value="symptoms" 
-                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl transition-all h-full"
               >
                 <ClipboardCheck className="w-4 h-4" /> Symptoms
               </TabsTrigger>
               <TabsTrigger 
                 value="reminders" 
-                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl transition-all h-full"
               >
                 <Bell className="w-4 h-4" /> Reminders
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="analyzer" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                <div className="lg:col-span-7 space-y-6">
-                  <Card className="border-none shadow-sm bg-card/50 backdrop-blur-sm overflow-hidden">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <LayoutDashboard className="w-5 h-5 text-primary" />
-                          <CardTitle className="text-xl font-headline">Patient Dashboard</CardTitle>
-                        </div>
-                        <Badge variant="outline" className="text-xs font-bold uppercase tracking-widest text-primary border-primary/20">
-                          Active Profile
-                        </Badge>
+            <TabsContent value="analyzer" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none space-y-8">
+              <Card className="border-none shadow-sm bg-white dark:bg-card overflow-hidden rounded-3xl">
+                <CardHeader className="p-8 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-primary/10 rounded-xl">
+                        <LayoutDashboard className="w-6 h-6 text-primary" />
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-8">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Age</p>
-                          <p className="text-xl font-bold">{patientData.age || '--'} <span className="text-sm font-normal text-muted-foreground">yrs</span></p>
-                        </div>
-                        <div className="p-4 rounded-xl bg-accent/5 border border-accent/10">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Weight</p>
-                          <p className="text-xl font-bold">{patientData.weight || '--'} <span className="text-sm font-normal text-muted-foreground">kg</span></p>
-                        </div>
-                        <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Sex</p>
-                          <p className="text-xl font-bold capitalize">{patientData.sex || '--'}</p>
-                        </div>
-                        <div className="p-4 rounded-xl bg-accent/5 border border-accent/10">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Height</p>
-                          <p className="text-xl font-bold">{patientData.height || '--'} <span className="text-sm font-normal text-muted-foreground">cm</span></p>
-                        </div>
-                      </div>
+                      <CardTitle className="text-2xl font-headline font-bold">Patient Dashboard</CardTitle>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest text-primary border-primary/20 px-3 py-1 bg-primary/5">
+                      ACTIVE PROFILE
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-8 pt-4 space-y-10">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="p-6 rounded-2xl bg-[#F0F4FF] dark:bg-primary/5 border border-primary/10">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Age</p>
+                      <p className="text-2xl font-extrabold">{patientData.age || '**'} <span className="text-sm font-medium text-muted-foreground">yrs</span></p>
+                    </div>
+                    <div className="p-6 rounded-2xl bg-[#F0F4FF] dark:bg-primary/5 border border-primary/10">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Weight</p>
+                      <p className="text-2xl font-extrabold">{patientData.weight || '**'} <span className="text-sm font-medium text-muted-foreground">kg</span></p>
+                    </div>
+                    <div className="p-6 rounded-2xl bg-[#F0F4FF] dark:bg-primary/5 border border-primary/10">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Sex</p>
+                      <p className="text-2xl font-extrabold capitalize">{patientData.sex || '--'}</p>
+                    </div>
+                    <div className="p-6 rounded-2xl bg-[#F0F4FF] dark:bg-primary/5 border border-primary/10">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Height</p>
+                      <p className="text-2xl font-extrabold">{patientData.height || '**'} <span className="text-sm font-medium text-muted-foreground">cm</span></p>
+                    </div>
+                  </div>
 
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-sm flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-primary" /> Health Indicators
-                        </h4>
-                        <div className="grid gap-3">
-                          <div className="flex items-center justify-between p-3 rounded-lg border bg-background/50">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                              <span className="text-sm font-medium">Allergies</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground max-w-[200px] truncate text-right">
-                              {patientData.allergies || 'None reported'}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between p-3 rounded-lg border bg-background/50">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full bg-primary" />
-                              <span className="text-sm font-medium">Chronic Conditions</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground max-w-[200px] truncate text-right">
-                              {patientData.chronicConditions || 'None reported'}
-                            </span>
-                          </div>
+                  <div className="space-y-6">
+                    <h4 className="font-bold text-sm uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                      <Activity className="w-4 h-4 text-primary" /> Health Indicators
+                    </h4>
+                    <div className="grid gap-4">
+                      <div className="flex items-center justify-between p-5 rounded-2xl border bg-white dark:bg-card/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2.5 h-2.5 rounded-full bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                          <span className="text-sm font-semibold">Allergies</span>
                         </div>
+                        <span className="text-sm text-muted-foreground">
+                          {patientData.allergies || 'None reported'}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                      <div className="flex items-center justify-between p-5 rounded-2xl border bg-white dark:bg-card/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(40,85,190,0.5)]" />
+                          <span className="text-sm font-semibold">Chronic Conditions</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {patientData.chronicConditions || 'None reported'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <div className="lg:col-span-5 space-y-6">
-                  <ReportUploader onInsightsExtracted={handleInsights} onXrayDetected={handleXrayDetected} />
-                </div>
+              <div className="w-full">
+                <ReportUploader onInsightsExtracted={handleInsights} onXrayDetected={handleXrayDetected} />
               </div>
             </TabsContent>
 
@@ -350,17 +343,17 @@ export default function MedibuddyHome() {
 
       <RajuChatbot />
 
-      <footer className="border-t py-16 bg-card no-print">
+      <footer className="border-t py-20 bg-white dark:bg-card no-print">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-xs text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className="text-[11px] text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-10">
             <strong>Medical Disclaimer:</strong> Medibuddy is an AI-powered assistant designed for informational purposes. It is NOT a substitute for professional medical advice, diagnosis, or treatment.
           </p>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-[10px] text-muted-foreground font-bold tracking-widest uppercase">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-[10px] text-muted-foreground font-bold tracking-[0.2em] uppercase">
             <span>© 2024 Medibuddy Tech</span>
             <span className="hidden md:inline text-border">•</span>
-            <a href="#" className="hover:underline underline-offset-4">Terms of Service</a>
+            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
             <span className="hidden md:inline text-border">•</span>
-            <a href="#" className="hover:underline underline-offset-4">Privacy Policy</a>
+            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
           </div>
         </div>
       </footer>
