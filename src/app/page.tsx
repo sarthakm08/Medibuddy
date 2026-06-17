@@ -5,7 +5,7 @@ import { PatientProfile, PatientData } from '@/components/patient-profile';
 import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
-import { ShieldPlus, Heart, Stethoscope } from 'lucide-react';
+import { ShieldPlus, Heart, Stethoscope, ChevronRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function MedibuddyHome() {
@@ -27,17 +27,17 @@ export default function MedibuddyHome() {
   };
 
   return (
-    <div className="min-h-screen selection:bg-primary/20">
+    <div className="min-h-screen selection:bg-primary/20 bg-[#F7F8FA]">
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md no-print">
+      <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md no-print shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 group">
-            <div className="p-2 bg-primary rounded-xl group-hover:rotate-12 transition-transform">
+          <div className="flex items-center gap-2 group cursor-pointer">
+            <div className="p-2 bg-primary rounded-xl group-hover:rotate-12 transition-transform shadow-md shadow-primary/20">
               <ShieldPlus className="w-6 h-6 text-primary-foreground" />
             </div>
             <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">Medibuddy</h1>
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+          <div className="hidden md:flex items-center gap-8 text-sm font-bold text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors">How it works</a>
             <a href="#" className="hover:text-primary transition-colors">Privacy</a>
             <a href="#" className="hover:text-primary transition-colors">Support</a>
@@ -46,38 +46,70 @@ export default function MedibuddyHome() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
         {/* Intro Section - No Print */}
         <section className="mb-12 no-print">
-          <div className="max-w-2xl">
-            <h2 className="font-headline text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Your Intelligent Medical Companion
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4 border border-primary/20">
+              <ShieldPlus className="w-3 h-3" /> AI-Powered Health Companion
+            </div>
+            <h2 className="font-headline text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-slate-900">
+              Your Intelligent <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Medical Assistant</span>
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Simplify your healthcare journey. Upload medical reports and receive structured summaries, medication tracking, and safety alerts tailored to your profile.
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+              Understand your health data better. Upload medical reports to get structured summaries, medication tracking, and interactive safety analysis tailored to you.
             </p>
           </div>
         </section>
 
         <div className="grid grid-cols-1 gap-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8 no-print">
-              <TabsTrigger value="profile" className="gap-2">
+            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-12 no-print bg-white p-1 rounded-xl shadow-sm border h-14">
+              <TabsTrigger 
+                value="profile" 
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
                 <Heart className="w-4 h-4" /> 1. Patient Profile
               </TabsTrigger>
-              <TabsTrigger value="analysis" className="gap-2" disabled={!insights}>
+              <TabsTrigger 
+                value="analysis" 
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all" 
+                disabled={!insights}
+              >
                 <Stethoscope className="w-4 h-4" /> 2. Health Analysis
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="profile" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <PatientProfile data={patientData} onChange={setPatientData} />
-                <ReportUploader onInsightsExtracted={handleInsights} />
+            <TabsContent value="profile" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                <div className="lg:col-span-7">
+                  <PatientProfile data={patientData} onChange={setPatientData} />
+                </div>
+                <div className="lg:col-span-5 flex flex-col gap-6">
+                  <ReportUploader onInsightsExtracted={handleInsights} />
+                  
+                  {/* Informational card for next step */}
+                  <div className={`p-6 rounded-2xl border bg-white/50 backdrop-blur-sm transition-all duration-500 flex items-center justify-between ${insights ? 'opacity-100' : 'opacity-40 grayscale'}`}>
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-green-100 text-green-600 rounded-xl">
+                        <Stethoscope className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm">Step 2: Analysis Ready</h4>
+                        <p className="text-xs text-muted-foreground">Upload a report to unlock clinical insights.</p>
+                      </div>
+                    </div>
+                    {insights && (
+                      <Button variant="ghost" size="icon" onClick={() => setActiveTab('analysis')} className="text-primary hover:bg-primary/10">
+                        <ChevronRight className="w-6 h-6" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="analysis" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <TabsContent value="analysis" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
               {insights && (
                 <AnalysisDashboard insights={insights} patientData={patientData} />
               )}
@@ -87,24 +119,39 @@ export default function MedibuddyHome() {
       </main>
 
       {/* Minimal Footer */}
-      <footer className="border-t py-12 bg-white/50 no-print">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <ShieldPlus className="w-5 h-5 text-primary/50" />
-            <span className="font-headline font-bold text-primary/50">Medibuddy</span>
+      <footer className="border-t py-16 bg-white no-print">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
+            <div className="flex items-center gap-2">
+              <ShieldPlus className="w-6 h-6 text-primary" />
+              <span className="font-headline font-bold text-xl text-primary">Medibuddy</span>
+            </div>
+            <div className="flex gap-8 text-sm font-medium text-muted-foreground">
+              <a href="#" className="hover:text-primary transition-colors">Safety Guide</a>
+              <a href="#" className="hover:text-primary transition-colors">Partners</a>
+              <a href="#" className="hover:text-primary transition-colors">Contact</a>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-            Medibuddy is an AI-powered assistant. Always consult with a licensed healthcare professional before making any medical decisions.
-          </p>
-          <div className="mt-8 pt-8 border-t flex flex-col md:flex-row items-center justify-center gap-4 text-xs text-muted-foreground">
-            <span>© 2024 Medibuddy Tech. All rights reserved.</span>
-            <span className="hidden md:inline">•</span>
-            <a href="#" className="hover:underline">Terms of Service</a>
-            <span className="hidden md:inline">•</span>
-            <a href="#" className="hover:underline">Privacy Policy</a>
+          <Separator className="mb-8 opacity-50" />
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
+              <strong>Medical Disclaimer:</strong> Medibuddy is an AI-powered assistant designed for informational purposes. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult with a licensed healthcare professional before making any medical decisions.
+            </p>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-[10px] text-muted-foreground font-bold tracking-widest uppercase">
+              <span>© 2024 Medibuddy Tech</span>
+              <span className="hidden md:inline text-slate-200">•</span>
+              <a href="#" className="hover:underline underline-offset-4">Terms of Service</a>
+              <span className="hidden md:inline text-slate-200">•</span>
+              <a href="#" className="hover:underline underline-offset-4">Privacy Policy</a>
+            </div>
           </div>
         </div>
       </footer>
     </div>
   );
+}
+
+// Minimal Separator inline for page layout
+function Separator({ className }: { className?: string }) {
+  return <div className={`h-[1px] w-full bg-slate-200 ${className}`} />;
 }
