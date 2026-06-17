@@ -5,8 +5,9 @@ import { PatientProfile, PatientData } from '@/components/patient-profile';
 import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { XrayAnalyzer } from '@/components/xray-analyzer';
+import { SymptomChecker } from '@/components/symptom-checker';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
-import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle, Moon, Sun } from 'lucide-react';
+import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle, Moon, Sun, ClipboardCheck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -139,7 +140,7 @@ export default function MedibuddyHome() {
 
         <div className="grid grid-cols-1 gap-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-xl mx-auto mb-12 no-print bg-card p-1 rounded-xl shadow-sm border h-14">
+            <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto mb-12 no-print bg-card p-1 rounded-xl shadow-sm border h-14">
               <TabsTrigger 
                 value="profile" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
@@ -158,6 +159,12 @@ export default function MedibuddyHome() {
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
               >
                 <Scan className="w-4 h-4" /> X-ray Analyzer
+              </TabsTrigger>
+              <TabsTrigger 
+                value="symptoms" 
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
+              >
+                <ClipboardCheck className="w-4 h-4" /> Symptom Checker
               </TabsTrigger>
             </TabsList>
 
@@ -197,6 +204,10 @@ export default function MedibuddyHome() {
 
             <TabsContent value="xray" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
               <XrayAnalyzer initialImage={prefilledXrayUri} />
+            </TabsContent>
+
+            <TabsContent value="symptoms" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+              <SymptomChecker />
             </TabsContent>
           </Tabs>
         </div>
