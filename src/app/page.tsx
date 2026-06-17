@@ -18,8 +18,7 @@ import {
   FileSearch,
   Activity,
   Bell,
-  Sparkles,
-  Settings
+  Sparkles
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -103,7 +102,6 @@ export default function MedibuddyHome() {
     setPatientData(updatedData);
     if (profileRef) {
       const dataToSave = { ...updatedData };
-      // Sanitize undefined for Firestore
       Object.keys(dataToSave).forEach(key => {
         const k = key as keyof PatientData;
         if (dataToSave[k] === undefined) {
@@ -126,9 +124,9 @@ export default function MedibuddyHome() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between no-print">
+      <header className="sticky top-0 z-50 w-full glass h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 no-print">
         <div className="flex items-center gap-2">
           <ShieldPlus className="w-6 h-6 text-primary" />
           <h1 className="font-headline text-xl font-bold tracking-tight text-primary">MEDIBUDDY</h1>
@@ -137,9 +135,9 @@ export default function MedibuddyHome() {
         <div className="flex items-center gap-3">
           <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/40 transition-colors">
                 {patientData.profilePhoto ? (
-                  <div className="relative w-8 h-8 rounded-full overflow-hidden border">
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/50 shadow-sm">
                     <Image src={patientData.profilePhoto} fill className="object-cover" alt="Profile" />
                   </div>
                 ) : (
@@ -147,106 +145,106 @@ export default function MedibuddyHome() {
                 )}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+            <DialogContent className="max-w-3xl max-h-[90vh] p-0 glass border-white/60">
               <DialogHeader className="p-6 pb-0">
-                <DialogTitle className="text-2xl font-headline font-bold">Patient Profile Settings</DialogTitle>
+                <DialogTitle className="text-2xl font-headline font-bold text-primary">Patient Profile Settings</DialogTitle>
               </DialogHeader>
               <ScrollArea className="max-h-[70vh] p-6 pt-2">
                 <PatientProfile data={patientData} onChange={handleProfileChange} />
               </ScrollArea>
               <DialogFooter className="p-6 pt-2">
-                <Button onClick={() => setIsProfileDialogOpen(false)} className="w-full">Save Changes</Button>
+                <Button onClick={() => setIsProfileDialogOpen(false)} className="w-full glass bg-primary text-white hover:bg-primary/90">Save Changes</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
+      <main className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
         <div className="flex flex-col gap-8">
           {/* Welcome Banner */}
-          <section className="space-y-2">
-            <h2 className="text-3xl font-headline font-bold text-slate-900">
+          <section className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-700">
+            <h2 className="text-3xl font-headline font-bold text-slate-900 drop-shadow-sm">
               Welcome back, {patientData.name || 'Patient'}
             </h2>
-            <p className="text-muted-foreground">Manage your medical reports and health parameters in one intelligent workspace.</p>
+            <p className="text-muted-foreground font-medium">Manage your medical reports and health parameters in one intelligent workspace.</p>
           </section>
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-white p-1 rounded-xl shadow-sm border mb-8 no-print h-14">
-              <TabsTrigger value="analyzer" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all h-full">
+            <TabsList className="grid w-full grid-cols-5 glass p-1 rounded-2xl shadow-lg border-white/60 mb-8 no-print h-14">
+              <TabsTrigger value="analyzer" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <FileSearch className="w-4 h-4" /> Analyzer
               </TabsTrigger>
-              <TabsTrigger value="analysis" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all h-full">
+              <TabsTrigger value="analysis" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <Activity className="w-4 h-4" /> Health Analysis
               </TabsTrigger>
-              <TabsTrigger value="xray" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all h-full">
+              <TabsTrigger value="xray" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <Scan className="w-4 h-4" /> X-ray Analyzer
               </TabsTrigger>
-              <TabsTrigger value="symptoms" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all h-full">
+              <TabsTrigger value="symptoms" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <Stethoscope className="w-4 h-4" /> Symptom Checker
               </TabsTrigger>
-              <TabsTrigger value="reminders" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all h-full">
+              <TabsTrigger value="reminders" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <Bell className="w-4 h-4" /> Reminders
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="analyzer" className="space-y-8">
+            <TabsContent value="analyzer" className="space-y-8 animate-in fade-in duration-500">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                 {/* Left Column: Patient Overview */}
                 <div className="md:col-span-4 space-y-6">
-                  <Card className="border-none shadow-sm bg-white overflow-hidden">
+                  <Card className="glass-morphism border-none">
                     <CardHeader className="pb-4">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2">
-                          <LayoutDashboard className="w-5 h-5 text-primary" />
+                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
+                          <LayoutDashboard className="w-5 h-5" />
                           Dashboard
                         </CardTitle>
-                        <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest text-primary border-primary/20">Active Profile</Badge>
+                        <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest text-primary border-primary/20 bg-white/50 backdrop-blur-sm">Active Profile</Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 rounded-xl bg-slate-50 border">
+                        <div className="p-4 rounded-2xl bg-white/40 border border-white/60 shadow-inner">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Age</p>
-                          <p className="text-xl font-bold">{patientData.age || '--'} <span className="text-sm font-normal text-muted-foreground">yrs</span></p>
+                          <p className="text-xl font-bold text-primary">{patientData.age || '--'} <span className="text-sm font-normal text-muted-foreground">yrs</span></p>
                         </div>
-                        <div className="p-4 rounded-xl bg-slate-50 border">
+                        <div className="p-4 rounded-2xl bg-white/40 border border-white/60 shadow-inner">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Weight</p>
-                          <p className="text-xl font-bold">{patientData.weight || '--'} <span className="text-sm font-normal text-muted-foreground">kg</span></p>
+                          <p className="text-xl font-bold text-primary">{patientData.weight || '--'} <span className="text-sm font-normal text-muted-foreground">kg</span></p>
                         </div>
-                        <div className="p-4 rounded-xl bg-slate-50 border">
+                        <div className="p-4 rounded-2xl bg-white/40 border border-white/60 shadow-inner">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sex</p>
-                          <p className="text-xl font-bold capitalize">{patientData.sex || '--'}</p>
+                          <p className="text-xl font-bold capitalize text-primary">{patientData.sex || '--'}</p>
                         </div>
-                        <div className="p-4 rounded-xl bg-slate-50 border">
+                        <div className="p-4 rounded-2xl bg-white/40 border border-white/60 shadow-inner">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Height</p>
-                          <p className="text-xl font-bold">{patientData.height || '--'} <span className="text-sm font-normal text-muted-foreground">cm</span></p>
+                          <p className="text-xl font-bold text-primary">{patientData.height || '--'} <span className="text-sm font-normal text-muted-foreground">cm</span></p>
                         </div>
                       </div>
 
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm font-semibold">
-                          <div className="w-2 h-2 rounded-full bg-destructive" />
-                          <span>Allergies: <span className="font-normal text-muted-foreground">{patientData.allergies || 'None'}</span></span>
+                        <div className="flex items-center gap-2 text-sm font-semibold p-2 rounded-xl hover:bg-white/30 transition-colors">
+                          <div className="w-2 h-2 rounded-full bg-destructive shadow-sm" />
+                          <span className="text-primary">Allergies: <span className="font-normal text-muted-foreground">{patientData.allergies || 'None'}</span></span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm font-semibold">
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          <span>Conditions: <span className="font-normal text-muted-foreground">{patientData.chronicConditions || 'None'}</span></span>
+                        <div className="flex items-center gap-2 text-sm font-semibold p-2 rounded-xl hover:bg-white/30 transition-colors">
+                          <div className="w-2 h-2 rounded-full bg-secondary shadow-sm" />
+                          <span className="text-primary">Conditions: <span className="font-normal text-muted-foreground">{patientData.chronicConditions || 'None'}</span></span>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="border-none shadow-sm bg-primary/5">
+                  <Card className="glass border-white/60 shadow-inner">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <div className="p-2 bg-primary/10 rounded-lg">
+                        <div className="p-2 bg-primary/10 rounded-xl">
                           <Sparkles className="w-5 h-5 text-primary" />
                         </div>
                         <div className="space-y-1">
-                          <h4 className="font-bold text-sm">Pro Tip</h4>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
+                          <h4 className="font-bold text-sm text-primary">Pro Tip</h4>
+                          <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                             Upload your latest blood panel or diagnostic report to see an AI-powered medication interaction check.
                           </p>
                         </div>
@@ -262,19 +260,19 @@ export default function MedibuddyHome() {
               </div>
             </TabsContent>
 
-            <TabsContent value="analysis">
+            <TabsContent value="analysis" className="animate-in fade-in duration-500">
               {insights && <AnalysisDashboard insights={insights} patientData={patientData} />}
             </TabsContent>
 
-            <TabsContent value="xray">
+            <TabsContent value="xray" className="animate-in fade-in duration-500">
               <XrayAnalyzer initialImage={prefilledXrayUri} />
             </TabsContent>
 
-            <TabsContent value="symptoms">
+            <TabsContent value="symptoms" className="animate-in fade-in duration-500">
               <SymptomChecker />
             </TabsContent>
 
-            <TabsContent value="reminders">
+            <TabsContent value="reminders" className="animate-in fade-in duration-500">
               <MedicineReminder />
             </TabsContent>
           </Tabs>
@@ -283,10 +281,10 @@ export default function MedibuddyHome() {
       
       <RajuChatbot />
 
-      <footer className="mt-20 py-8 border-t text-center text-xs text-muted-foreground no-print">
+      <footer className="mt-20 py-8 glass border-t-white/40 text-center text-xs text-muted-foreground no-print relative z-10">
         <div className="container mx-auto px-4 flex flex-col items-center gap-4">
-          <p><strong>Medical Disclaimer:</strong> Medibuddy is an AI assistant for informational purposes only. It is not a substitute for professional medical advice.</p>
-          <p>&copy; 2024 Medibuddy AI Assistant • Patient-First Healthcare</p>
+          <p className="font-medium"><strong>Medical Disclaimer:</strong> Medibuddy is an AI assistant for informational purposes only. It is not a substitute for professional medical advice.</p>
+          <p className="opacity-70">&copy; 2024 Medibuddy AI Assistant • Patient-First Healthcare</p>
         </div>
       </footer>
     </div>

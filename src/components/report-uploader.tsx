@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,20 +59,20 @@ export function ReportUploader({ onInsightsExtracted, onXrayDetected }: ReportUp
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-sm border-none bg-white dark:bg-card overflow-hidden rounded-3xl">
+      <Card className="glass-morphism overflow-hidden rounded-[2.5rem] border-white/60 shadow-2xl">
         <CardHeader className="p-8 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-primary/10 rounded-xl">
+            <div className="p-3 bg-primary/10 rounded-2xl backdrop-blur-sm">
               <FileText className="w-6 h-6 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-headline font-bold">Intelligent Report Uploader</CardTitle>
+            <CardTitle className="text-2xl font-headline font-bold text-primary">Intelligent Report Uploader</CardTitle>
           </div>
-          <CardDescription className="text-base mt-2">Securely upload your medical documents for AI-powered data extraction.</CardDescription>
+          <CardDescription className="text-base mt-2 font-medium">Securely upload your medical documents for AI-powered data extraction.</CardDescription>
         </CardHeader>
         <CardContent className="p-8 pt-4">
           <div 
             onClick={triggerUpload}
-            className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-3xl bg-[#FAFAFA] dark:bg-background/40 cursor-pointer hover:bg-[#F0F4FF] dark:hover:bg-primary/5 transition-all group border-primary/20"
+            className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-[2rem] bg-white/20 backdrop-blur-sm cursor-pointer hover:bg-primary/5 hover:border-primary/40 transition-all duration-500 group border-white/40 shadow-inner"
           >
             <input 
               type="file" 
@@ -86,25 +85,27 @@ export function ReportUploader({ onInsightsExtracted, onXrayDetected }: ReportUp
             {isUploading ? (
               <div className="flex flex-col items-center gap-4">
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                <p className="text-lg font-bold animate-pulse">Analyzing your report...</p>
+                <p className="text-xl font-bold text-primary animate-pulse">Analyzing your report...</p>
               </div>
             ) : fileName && !errorMsg ? (
-              <div className="flex flex-col items-center gap-4">
-                <CheckCircle2 className="w-12 h-12 text-green-500" />
-                <p className="text-lg font-bold text-center">
+              <div className="flex flex-col items-center gap-4 animate-in zoom-in-95 duration-500">
+                <div className="p-4 bg-green-100/50 rounded-full shadow-lg">
+                  <CheckCircle2 className="w-12 h-12 text-green-600" />
+                </div>
+                <p className="text-xl font-bold text-center text-primary">
                   <span className="block">Uploaded Successfully</span>
                   <span className="text-sm font-medium text-muted-foreground">{fileName}</span>
                 </p>
-                <Button variant="outline" size="sm" className="mt-2 rounded-full px-6">Replace File</Button>
+                <Button variant="outline" size="sm" className="mt-2 rounded-full px-8 glass border-primary/20 hover:bg-primary/5">Replace File</Button>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-5">
-                <div className="p-5 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors shadow-sm">
-                  <Upload className="w-8 h-8 text-primary" />
+                <div className="p-6 rounded-full bg-white/40 group-hover:bg-primary/20 transition-all duration-500 shadow-xl group-hover:scale-110">
+                  <Upload className="w-10 h-10 text-primary" />
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold">Click to upload or drag & drop</p>
-                  <p className="text-sm text-muted-foreground mt-1 font-medium">PDF, JPG, or PNG (Max 10MB)</p>
+                  <p className="text-xl font-bold text-primary">Click to upload or drag & drop</p>
+                  <p className="text-sm text-muted-foreground mt-1 font-semibold">PDF, JPG, or PNG (Max 10MB)</p>
                 </div>
               </div>
             )}
@@ -113,10 +114,10 @@ export function ReportUploader({ onInsightsExtracted, onXrayDetected }: ReportUp
       </Card>
 
       {errorMsg && (
-        <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 rounded-2xl border-2">
+        <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 glass border-destructive/20 shadow-lg rounded-2xl">
           <AlertCircle className="h-5 w-5" />
           <AlertTitle className="font-bold">Analysis Note</AlertTitle>
-          <AlertDescription className="text-sm font-medium">{errorMsg}</AlertDescription>
+          <AlertDescription className="text-sm font-semibold">{errorMsg}</AlertDescription>
         </Alert>
       )}
     </div>
