@@ -21,6 +21,7 @@ export default function MedibuddyHome() {
     sex: '',
     weight: '',
     height: '',
+    address: '',
     allergies: '',
     chronicConditions: '',
     accidentHistory: ''

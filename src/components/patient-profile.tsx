@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, Activity, AlertCircle, Phone, History, Venus, Mars } from 'lucide-react';
+import { User, Activity, AlertCircle, Phone, History, Venus, Mars, MapPin } from 'lucide-react';
 
 export interface PatientData {
   name: string;
@@ -13,6 +13,7 @@ export interface PatientData {
   sex: string;
   weight: string;
   height: string;
+  address: string;
   allergies: string;
   chronicConditions: string;
   accidentHistory: string;
@@ -82,6 +83,20 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
             </Label>
             <Input id="weight" name="weight" type="number" value={data.weight} onChange={handleChange} placeholder="70" />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="address" className="flex items-center gap-1">
+            <MapPin className="w-3 h-3" /> Residential Address
+          </Label>
+          <Textarea 
+            id="address" 
+            name="address" 
+            value={data.address} 
+            onChange={handleChange} 
+            placeholder="Enter your full home address" 
+            className="min-h-[60px]"
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
