@@ -6,11 +6,12 @@ import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { XrayAnalyzer } from '@/components/xray-analyzer';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
-import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle } from 'lucide-react';
+import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan, UserCircle, LayoutDashboard, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import Link from 'next/link';
 
 export default function MedibuddyHome() {
   const [patientData, setPatientData] = useState<PatientData>({
@@ -46,12 +47,13 @@ export default function MedibuddyHome() {
             <h1 className="font-headline text-2xl font-bold tracking-tight text-primary">Medibuddy</h1>
           </div>
           
-          <div className="flex items-center gap-4 md:gap-8">
-            <div className="hidden md:flex items-center gap-8 text-sm font-bold text-muted-foreground">
-              <a href="#" className="hover:text-primary transition-colors">How it works</a>
-              <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-              <a href="#" className="hover:text-primary transition-colors">Support</a>
-            </div>
+          <div className="flex items-center gap-4 md:gap-6">
+            <Link href="/advanced-features">
+              <Button variant="ghost" className="gap-2 text-primary font-bold hover:bg-primary/5 hidden sm:flex">
+                <Sparkles className="w-4 h-4" />
+                Advanced Features
+              </Button>
+            </Link>
             
             <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
               <DialogTrigger asChild>
