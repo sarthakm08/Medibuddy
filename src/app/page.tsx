@@ -6,6 +6,8 @@ import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
 import { XrayAnalyzer } from '@/components/xray-analyzer';
 import { SymptomChecker } from '@/components/symptom-checker';
+import { MedicineReminder } from '@/components/medicine-reminder';
+import { RajuChatbot } from '@/components/raju-chatbot';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
 import { 
   ShieldPlus, 
@@ -21,7 +23,8 @@ import {
   FileSearch,
   Activity,
   User,
-  AlertCircle
+  AlertCircle,
+  Bell
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -179,36 +182,41 @@ export default function MedibuddyHome() {
 
         <div className="grid grid-cols-1 gap-8">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto mb-12 no-print bg-card p-1 rounded-xl shadow-sm border h-14">
+            <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto mb-12 no-print bg-card p-1 rounded-xl shadow-sm border h-14">
               <TabsTrigger 
                 value="analyzer" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
               >
-                <FileSearch className="w-4 h-4" /> Report Analyzer
+                <FileSearch className="w-4 h-4" /> Analyzer
               </TabsTrigger>
               <TabsTrigger 
                 value="analysis" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
               >
-                <Stethoscope className="w-4 h-4" /> Health Analysis
+                <Stethoscope className="w-4 h-4" /> Analysis
               </TabsTrigger>
               <TabsTrigger 
                 value="xray" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
               >
-                <Scan className="w-4 h-4" /> X-ray Analyzer
+                <Scan className="w-4 h-4" /> X-ray
               </TabsTrigger>
               <TabsTrigger 
                 value="symptoms" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
               >
-                <ClipboardCheck className="w-4 h-4" /> Symptom Checker
+                <ClipboardCheck className="w-4 h-4" /> Symptoms
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reminders" 
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-all"
+              >
+                <Bell className="w-4 h-4" /> Reminders
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analyzer" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                {/* Patient Summary Dashboard */}
                 <div className="lg:col-span-7 space-y-6">
                   <Card className="border-none shadow-sm bg-card/50 backdrop-blur-sm overflow-hidden">
                     <CardHeader className="pb-4">
@@ -265,51 +273,14 @@ export default function MedibuddyHome() {
                               {patientData.chronicConditions || 'None reported'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between p-3 rounded-lg border bg-background/50">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full bg-green-500" />
-                              <span className="text-sm font-medium">Last Analysis</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {insights ? 'Ready to view' : 'No report uploaded'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-muted/20 rounded-xl border border-dashed flex items-start gap-3">
-                        <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5" />
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Pro-Tip</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Complete your profile by clicking the "Profile" button in the top bar to get more accurate AI interactions.
-                          </p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Report Uploader & Status */}
                 <div className="lg:col-span-5 space-y-6">
                   <ReportUploader onInsightsExtracted={handleInsights} onXrayDetected={handleXrayDetected} />
-                  
-                  <div className={`p-6 rounded-2xl border bg-card/50 backdrop-blur-sm transition-all duration-500 flex items-center justify-between ${insights ? 'opacity-100' : 'opacity-40 grayscale'}`}>
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-green-100 text-green-600 rounded-xl">
-                        <Stethoscope className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm">Analysis Ready</h4>
-                        <p className="text-xs text-muted-foreground">Clinical profile successfully scanned.</p>
-                      </div>
-                    </div>
-                    {insights && (
-                      <Button variant="ghost" size="icon" onClick={() => setActiveTab('analysis')} className="text-primary hover:bg-primary/10">
-                        <ChevronRight className="w-6 h-6" />
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -327,9 +298,16 @@ export default function MedibuddyHome() {
             <TabsContent value="symptoms" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
               <SymptomChecker />
             </TabsContent>
+
+            <TabsContent value="reminders" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+              <MedicineReminder />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
+
+      {/* Floating Chatbot */}
+      <RajuChatbot />
 
       {/* Minimal Footer */}
       <footer className="border-t py-16 bg-card no-print">
