@@ -5,13 +5,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pill, Calendar, Info, ShieldAlert, Download, HeartPulse, ClipboardList, Activity, Stethoscope, ChevronRight } from 'lucide-react';
+import { Pill, Calendar, Info, ShieldAlert, Download, HeartPulse, ClipboardList, Activity, Stethoscope, ChevronRight, Apple, Loader2, X } from 'lucide-react';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
 import { analyzeMedicationInteractions, AnalyzeMedicationInteractionsOutput } from '@/ai/flows/analyze-medication-interactions';
+import { suggestDietPlan, DietPlanOutput } from '@/ai/flows/suggest-diet-plan-flow';
 import { PatientData } from './patient-profile';
 import { ProgressTracker } from './progress-tracker';
 import { DoctorScheduler } from './doctor-scheduler';
+import { MedicineReminder } from './medicine-reminder';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface AnalysisDashboardProps {
   insights: ExtractMedicalReportInsightsOutput;
@@ -21,6 +24,9 @@ interface AnalysisDashboardProps {
 export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardProps) {
   const [safetyAnalysis, setSafetyAnalysis] = useState<AnalyzeMedicationInteractionsOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [dietPlan, setDietPlan] = useState<DietPlanOutput | null>(null);
+  const [isGeneratingDiet, setIsGeneratingDiet] = useState(false);
+  const [showDietDialog, setShowDietDialog] = useState(false);
 
   useEffect(() => {
     async function performSafetyCheck() {
@@ -46,6 +52,24 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
     performSafetyCheck();
   }, [insights, patientData]);
 
+  const handleSuggestDiet = async () => {
+    setIsGeneratingDiet(true);
+    setShowDietDialog(true);
+    try {
+      const plan = await suggestDietPlan({
+        conditions: patientData.chronicConditions.split(',').map(s => s.trim()).filter(Boolean),
+        medications: insights.medications.map(m => m.name),
+        weight: patientData.weight,
+        height: patientData.height
+      });
+      setDietPlan(plan);
+    } catch (error) {
+      console.error('Diet plan generation failed:', error);
+    } finally {
+      setIsGeneratingDiet(false);
+    }
+  };
+
   const handleExport = () => {
     window.print();
   };
@@ -57,29 +81,36 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
         <div>
           <h2 className="font-headline text-2xl font-bold flex items-center gap-2 text-primary">
             <HeartPulse className="w-6 h-6 animate-pulse text-destructive" />
-            Personalized Health Analysis
+            Health Analysis
           </h2>
-          <p className="text-muted-foreground text-sm mt-1">Comprehensive view of your medications, trends, and clinical summary.</p>
+          <p className="text-muted-foreground text-sm mt-1">Clinical overview and safety assessment.</p>
         </div>
-        <Button onClick={handleExport} className="gap-2 shadow-lg hover:scale-105 transition-transform">
-          <Download className="w-4 h-4" /> Export Health Summary
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={handleSuggestDiet} className="gap-2 border-primary/20 hover:bg-primary/5 text-primary shadow-sm transition-all">
+            <Apple className="w-4 h-4" /> Suggest Diet Plan
+          </Button>
+          <Button onClick={handleExport} className="gap-2 shadow-lg hover:scale-105 transition-all">
+            <Download className="w-4 h-4" /> Export Summary
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-2xl no-print bg-muted/30 p-1 mb-8">
+        <TabsList className="grid w-full grid-cols-4 max-w-3xl no-print bg-muted/30 p-1 mb-8 h-auto">
           <TabsTrigger value="overview" className="gap-2 py-3 data-[state=active]:shadow-md">
-            <ClipboardList className="w-4 h-4" /> Medical Overview
+            <ClipboardList className="w-4 h-4" /> Medical
+          </TabsTrigger>
+          <TabsTrigger value="reminders" className="gap-2 py-3 data-[state=active]:shadow-md">
+            <Pill className="w-4 h-4" /> Reminders
           </TabsTrigger>
           <TabsTrigger value="progress" className="gap-2 py-3 data-[state=active]:shadow-md">
-            <Activity className="w-4 h-4" /> Vital Progress
+            <Activity className="w-4 h-4" /> Vitals
           </TabsTrigger>
           <TabsTrigger value="appointments" className="gap-2 py-3 data-[state=active]:shadow-md">
             <Stethoscope className="w-4 h-4" /> Appointments
           </TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-8 mt-6">
           {/* Safety Alerts */}
           {isAnalyzing ? (
@@ -106,14 +137,6 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
             </div>
           )}
 
-          {!safetyAnalysis?.hasWarnings && safetyAnalysis !== null && !isAnalyzing && (
-            <Alert className="bg-green-50 border-green-200 text-green-800 shadow-sm">
-              <ShieldAlert className="h-4 w-4 text-green-600" />
-              <AlertTitle className="font-bold">Safety Check Passed</AlertTitle>
-              <AlertDescription className="opacity-90">Based on your clinical profile, no immediate drug-allergy or condition interactions were detected.</AlertDescription>
-            </Alert>
-          )}
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2 shadow-sm border-none bg-card/50 backdrop-blur-sm">
               <CardHeader>
@@ -123,7 +146,6 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
                   </div>
                   <CardTitle className="font-headline text-xl">Identified Medications</CardTitle>
                 </div>
-                <CardDescription>Extracted prescriptions and dosages from your medical report.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-xl border overflow-hidden shadow-sm bg-background">
@@ -133,24 +155,20 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
                         <TableHead className="font-bold text-foreground">Medicine</TableHead>
                         <TableHead className="font-bold text-foreground">Dosage</TableHead>
                         <TableHead className="font-bold text-foreground">Frequency</TableHead>
-                        <TableHead className="font-bold text-foreground">Route</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {insights.medications.length > 0 ? (
                         insights.medications.map((med, idx) => (
-                          <TableRow key={idx} className="hover:bg-muted/30 transition-colors">
+                          <TableRow key={idx}>
                             <TableCell className="font-semibold text-primary">{med.name}</TableCell>
                             <TableCell>{med.dosage}</TableCell>
                             <TableCell>{med.frequency}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">{med.route || 'Oral'}</Badge>
-                            </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-12 text-muted-foreground italic">No medications found in report.</TableCell>
+                          <TableCell colSpan={3} className="text-center py-12 text-muted-foreground italic">No medications found.</TableCell>
                         </TableRow>
                       )}
                     </TableBody>
@@ -165,73 +183,105 @@ export function AnalysisDashboard({ insights, patientData }: AnalysisDashboardPr
                   <div className="p-2 bg-accent/10 rounded-lg">
                     <Calendar className="w-5 h-5 text-accent" />
                   </div>
-                  <CardTitle className="font-headline text-xl">Treatment Timelines</CardTitle>
+                  <CardTitle className="font-headline text-xl">Timelines</CardTitle>
                 </div>
-                <CardDescription>Conditions and treatment durations.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[350px] pr-4">
-                  {insights.treatmentTimelines.length > 0 ? (
-                    insights.treatmentTimelines.map((timeline, idx) => (
-                      <div key={idx} className="relative pl-7 pb-8 border-l-2 border-accent/20 last:border-0 last:pb-0">
-                        <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-accent border-4 border-background shadow-sm" />
-                        <div className="space-y-1.5 p-4 bg-white rounded-xl shadow-sm border border-accent/5">
-                          <h4 className="text-sm font-bold text-foreground flex items-center justify-between">
-                            {timeline.condition}
-                            <ChevronRight className="w-3 h-3 text-accent" />
-                          </h4>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 font-medium">
-                            {timeline.startDate || 'Start Date N/A'} 
-                            <span className="text-accent/40 px-1">→</span>
-                            {timeline.endDate || 'Ongoing'}
-                          </p>
-                          {timeline.notes && <p className="text-xs mt-3 italic leading-relaxed text-muted-foreground bg-muted/30 p-2 rounded-md border-l-2 border-accent/30">{timeline.notes}</p>}
-                        </div>
+                <ScrollArea className="h-[300px] pr-4">
+                  {insights.treatmentTimelines.map((timeline, idx) => (
+                    <div key={idx} className="relative pl-7 pb-8 border-l-2 border-accent/20 last:border-0 last:pb-0">
+                      <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-accent border-4 border-background" />
+                      <div className="space-y-1.5 p-4 bg-white rounded-xl shadow-sm border border-accent/5">
+                        <h4 className="text-sm font-bold">{timeline.condition}</h4>
+                        <p className="text-xs text-muted-foreground">{timeline.startDate} → {timeline.endDate || 'Ongoing'}</p>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-12 text-muted-foreground italic text-sm border-2 border-dashed rounded-xl">No timelines extracted.</div>
-                  )}
+                    </div>
+                  ))}
                 </ScrollArea>
               </CardContent>
             </Card>
           </div>
-
-          {insights.otherKeyInformation && (
-            <Card className="shadow-sm border-none bg-card/50 backdrop-blur-sm overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-primary to-accent" />
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <ClipboardList className="w-5 h-5 text-primary" />
-                  <CardTitle className="font-headline text-xl">Clinical Observations</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-relaxed text-muted-foreground bg-white p-4 rounded-xl shadow-inner italic">
-                  "{insights.otherKeyInformation}"
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
-        {/* Progress Tab */}
+        <TabsContent value="reminders" className="mt-6">
+          <MedicineReminder />
+        </TabsContent>
+
         <TabsContent value="progress" className="mt-6">
           <ProgressTracker />
         </TabsContent>
 
-        {/* Appointments Tab */}
         <TabsContent value="appointments" className="mt-6">
           <DoctorScheduler />
         </TabsContent>
       </Tabs>
 
-      {/* Print-only Footer */}
-      <div className="print-only hidden mt-12 pt-6 border-t border-dashed">
-        <p className="text-[10px] text-center text-muted-foreground">
-          Medibuddy Analysis Summary • Generated on {new Date().toLocaleDateString()} • Confidential Patient Data
-        </p>
-      </div>
+      {/* Diet Plan Dialog */}
+      <Dialog open={showDietDialog} onOpenChange={setShowDietDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-headline text-2xl">
+              <Apple className="w-6 h-6 text-green-500" />
+              {isGeneratingDiet ? 'Generating Nutrition Strategy...' : dietPlan?.title}
+            </DialogTitle>
+            <DialogDescription>
+              Tailored dietary recommendations for faster clinical recovery.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {isGeneratingDiet ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <p className="text-sm font-medium animate-pulse">Analyzing clinical interactions and nutrient requirements...</p>
+            </div>
+          ) : dietPlan && (
+            <div className="space-y-8 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-green-700 uppercase tracking-wider">Recommended Foods</h4>
+                  <ul className="space-y-2">
+                    {dietPlan.recommendedFoods.map((f, i) => (
+                      <li key={i} className="text-sm flex items-start gap-2">
+                        <span className="text-green-500 mt-1">✓</span> {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-destructive uppercase tracking-wider">Foods to Avoid</h4>
+                  <ul className="space-y-2">
+                    {dietPlan.foodsToAvoid.map((f, i) => (
+                      <li key={i} className="text-sm flex items-start gap-2">
+                        <span className="text-destructive mt-1">✕</span> {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-bold text-sm uppercase tracking-wider">Daily Meal Schedule</h4>
+                <div className="grid gap-3">
+                  {dietPlan.dailySchedule.map((s, i) => (
+                    <div key={i} className="p-3 bg-muted/20 rounded-lg border flex flex-col sm:flex-row sm:items-center gap-2">
+                      <span className="font-bold text-xs min-w-[100px] text-primary">{s.meal}</span>
+                      <span className="text-sm text-muted-foreground">{s.suggestion}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Alert className="bg-primary/5 border-primary/20">
+                <Info className="h-4 w-4 text-primary" />
+                <AlertTitle className="font-bold">Recovery Tip</AlertTitle>
+                <AlertDescription className="text-xs leading-relaxed">
+                  {dietPlan.recoveryTips}
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { PatientProfile, PatientData } from '@/components/patient-profile';
 import { ReportUploader } from '@/components/report-uploader';
 import { AnalysisDashboard } from '@/components/analysis-dashboard';
+import { XrayAnalyzer } from '@/components/xray-analyzer';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
-import { ShieldPlus, Heart, Stethoscope, ChevronRight } from 'lucide-react';
+import { ShieldPlus, Heart, Stethoscope, ChevronRight, Scan } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 
@@ -58,14 +59,14 @@ export default function MedibuddyHome() {
               Your Intelligent <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Medical Assistant</span>
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              Understand your health data better. Upload medical reports to get structured summaries, medication tracking, and interactive safety analysis tailored to you.
+              Understand your health data better. Upload medical reports or X-rays to get structured summaries, medication tracking, and interactive safety analysis.
             </p>
           </div>
         </section>
 
         <div className="grid grid-cols-1 gap-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-12 no-print bg-white p-1 rounded-xl shadow-sm border h-14">
+            <TabsList className="grid w-full grid-cols-3 max-w-xl mx-auto mb-12 no-print bg-white p-1 rounded-xl shadow-sm border h-14">
               <TabsTrigger 
                 value="profile" 
                 className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
@@ -79,6 +80,12 @@ export default function MedibuddyHome() {
               >
                 <Stethoscope className="w-4 h-4" /> Health Analysis
               </TabsTrigger>
+              <TabsTrigger 
+                value="xray" 
+                className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all"
+              >
+                <Scan className="w-4 h-4" /> X-ray Analyzer
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
@@ -89,15 +96,14 @@ export default function MedibuddyHome() {
                 <div className="lg:col-span-5 flex flex-col gap-6">
                   <ReportUploader onInsightsExtracted={handleInsights} />
                   
-                  {/* Informational card for next step */}
                   <div className={`p-6 rounded-2xl border bg-white/50 backdrop-blur-sm transition-all duration-500 flex items-center justify-between ${insights ? 'opacity-100' : 'opacity-40 grayscale'}`}>
                     <div className="flex items-center gap-4">
                       <div className="p-3 bg-green-100 text-green-600 rounded-xl">
                         <Stethoscope className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm">Step 2: Analysis Ready</h4>
-                        <p className="text-xs text-muted-foreground">Upload a report to unlock clinical insights.</p>
+                        <h4 className="font-bold text-sm">Analysis Ready</h4>
+                        <p className="text-xs text-muted-foreground">Clinical profile successfully scanned.</p>
                       </div>
                     </div>
                     {insights && (
@@ -115,44 +121,29 @@ export default function MedibuddyHome() {
                 <AnalysisDashboard insights={insights} patientData={patientData} />
               )}
             </TabsContent>
+
+            <TabsContent value="xray" className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+              <XrayAnalyzer />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
 
       {/* Minimal Footer */}
       <footer className="border-t py-16 bg-white no-print">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
-            <div className="flex items-center gap-2">
-              <ShieldPlus className="w-6 h-6 text-primary" />
-              <span className="font-headline font-bold text-xl text-primary">Medibuddy</span>
-            </div>
-            <div className="flex gap-8 text-sm font-medium text-muted-foreground">
-              <a href="#" className="hover:text-primary transition-colors">Safety Guide</a>
-              <a href="#" className="hover:text-primary transition-colors">Partners</a>
-              <a href="#" className="hover:text-primary transition-colors">Contact</a>
-            </div>
-          </div>
-          <Separator className="mb-8 opacity-50" />
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
-              <strong>Medical Disclaimer:</strong> Medibuddy is an AI-powered assistant designed for informational purposes. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult with a licensed healthcare professional before making any medical decisions.
-            </p>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-[10px] text-muted-foreground font-bold tracking-widest uppercase">
-              <span>© 2024 Medibuddy Tech</span>
-              <span className="hidden md:inline text-slate-200">•</span>
-              <a href="#" className="hover:underline underline-offset-4">Terms of Service</a>
-              <span className="hidden md:inline text-slate-200">•</span>
-              <a href="#" className="hover:underline underline-offset-4">Privacy Policy</a>
-            </div>
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-xs text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
+            <strong>Medical Disclaimer:</strong> Medibuddy is an AI-powered assistant designed for informational purposes. It is NOT a substitute for professional medical advice, diagnosis, or treatment.
+          </p>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-[10px] text-muted-foreground font-bold tracking-widest uppercase">
+            <span>© 2024 Medibuddy Tech</span>
+            <span className="hidden md:inline text-slate-200">•</span>
+            <a href="#" className="hover:underline underline-offset-4">Terms of Service</a>
+            <span className="hidden md:inline text-slate-200">•</span>
+            <a href="#" className="hover:underline underline-offset-4">Privacy Policy</a>
           </div>
         </div>
       </footer>
     </div>
   );
-}
-
-// Minimal Separator inline for page layout
-function Separator({ className }: { className?: string }) {
-  return <div className={`h-[1px] w-full bg-slate-200 ${className}`} />;
 }
