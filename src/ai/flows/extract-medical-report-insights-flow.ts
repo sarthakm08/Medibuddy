@@ -7,7 +7,7 @@
  * - ExtractMedicalReportInsightsOutput - The return type for the extractMedicalReportInsights function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, commonConfig } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const ExtractMedicalReportInsightsInputSchema = z.object({
@@ -61,6 +61,7 @@ const prompt = ai.definePrompt({
   name: 'extractMedicalReportInsightsPrompt',
   input: { schema: ExtractMedicalReportInsightsInputSchema },
   output: { schema: ExtractMedicalReportInsightsOutputSchema },
+  config: commonConfig,
   prompt: `You are an expert medical assistant. Analyze the provided file.
 
 File: {{media url=medicalReportDataUri}}

@@ -3,7 +3,7 @@
  * @fileOverview This file defines a Genkit flow for detecting medicine details from a photo.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, commonConfig } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const DetectMedicineInputSchema = z.object({
@@ -28,6 +28,7 @@ const detectMedicinePrompt = ai.definePrompt({
   name: 'detectMedicinePrompt',
   input: { schema: DetectMedicineInputSchema },
   output: { schema: DetectMedicineOutputSchema },
+  config: commonConfig,
   prompt: `You are an expert pharmacist assistant. Analyze the provided photo of a medicine.
 
 Photo: {{media url=photoDataUri}}

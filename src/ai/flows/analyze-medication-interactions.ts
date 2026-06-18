@@ -8,7 +8,7 @@
  * - AnalyzeMedicationInteractionsOutput - The return type for the analyzeMedicationInteractions function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, commonConfig} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const AnalyzeMedicationInteractionsInputSchema = z.object({
@@ -38,6 +38,7 @@ const analyzeMedicationInteractionsPrompt = ai.definePrompt({
   name: 'analyzeMedicationInteractionsPrompt',
   input: {schema: AnalyzeMedicationInteractionsInputSchema},
   output: {schema: AnalyzeMedicationInteractionsOutputSchema},
+  config: commonConfig,
   prompt: `You are a highly skilled medical assistant specialized in identifying potential medication interactions, allergies, and conflicts with patient health parameters. Your goal is to analyze the provided information thoroughly and identify any potential warnings. Be precise and clear in your findings.
 
 Patient's known allergies:

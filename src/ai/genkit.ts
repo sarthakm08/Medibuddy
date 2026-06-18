@@ -11,6 +11,7 @@ export const ai = genkit({
 });
 
 // Configure global safety settings for development to prevent unexpected blocks
+// Especially important for medical/clinical content which can trigger false positives
 export const commonConfig = {
   safetySettings: [
     {
@@ -27,6 +28,10 @@ export const commonConfig = {
     },
     {
       category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+      threshold: 'BLOCK_NONE',
+    },
+    {
+      category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
       threshold: 'BLOCK_NONE',
     },
   ],

@@ -3,7 +3,7 @@
  * @fileOverview This file defines a Genkit flow for analyzing X-ray images.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, commonConfig } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const AnalyzeXrayInputSchema = z.object({
@@ -29,6 +29,7 @@ const analyzeXrayPrompt = ai.definePrompt({
   name: 'analyzeXrayPrompt',
   input: { schema: AnalyzeXrayInputSchema },
   output: { schema: AnalyzeXrayOutputSchema },
+  config: commonConfig,
   prompt: `You are an expert radiologist. Analyze the provided X-ray image.
 
 X-ray Image: {{media url=xrayDataUri}}

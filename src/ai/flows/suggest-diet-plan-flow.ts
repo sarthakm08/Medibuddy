@@ -3,7 +3,7 @@
  * @fileOverview This file defines a Genkit flow for suggesting a personalized diet plan based on patient health data.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, commonConfig } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const SuggestDietPlanInputSchema = z.object({
@@ -34,6 +34,7 @@ const suggestDietPlanPrompt = ai.definePrompt({
   name: 'suggestDietPlanPrompt',
   input: { schema: SuggestDietPlanInputSchema },
   output: { schema: DietPlanOutputSchema },
+  config: commonConfig,
   prompt: `You are a clinical nutritionist. Suggest a personalized diet plan for a patient with the following profile:
 
 Conditions: {{#each conditions}}- {{{this}}}

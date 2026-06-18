@@ -3,7 +3,7 @@
  * @fileOverview Personalized Health Coach Flow
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, commonConfig } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const HealthCoachInputSchema = z.object({
@@ -38,6 +38,7 @@ const healthCoachFlow = ai.defineFlow(
       Goals: ${input.goals || 'Improve overall wellness'}
       
       Provide daily suggestions, fitness recommendations, nutrition focus, and a wellness tip tailored to this specific profile.`,
+      config: commonConfig,
       output: { schema: HealthCoachOutputSchema },
     });
     return output!;
