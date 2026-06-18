@@ -24,7 +24,8 @@ import {
   Sparkles,
   Heart,
   ShieldAlert,
-  Phone
+  Phone,
+  ArrowUpCircle
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -85,9 +86,10 @@ export default function MedibuddyHome() {
 
   const handleInsights = (data: ExtractMedicalReportInsightsOutput) => {
     setInsights(data);
-    if (data.medications.length > 0 || data.treatmentTimelines.length > 0) {
-      setActiveTab('analysis');
-    }
+    toast({
+      title: "Analysis Complete",
+      description: "We've extracted insights from your medical report below.",
+    });
   };
 
   const handleXrayDetected = (uri: string) => {
@@ -96,14 +98,6 @@ export default function MedibuddyHome() {
   };
 
   const handleTabChange = (value: string) => {
-    if (value === 'analysis' && !insights) {
-      toast({
-        title: "Medical Report Required",
-        description: "Kindly upload a medical report first in the Analyzer tab.",
-        variant: "destructive",
-      });
-      return;
-    }
     setActiveTab(value);
   };
 
@@ -184,21 +178,18 @@ export default function MedibuddyHome() {
           </section>
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-6 glass p-1 rounded-2xl shadow-2xl border-white/10 mb-8 no-print h-14">
+            <TabsList className="grid w-full grid-cols-5 glass p-1 rounded-2xl shadow-2xl border-white/10 mb-8 no-print h-14">
               <TabsTrigger value="dashboard" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <LayoutDashboard className="w-4 h-4" /> Dashboard
               </TabsTrigger>
-              <TabsTrigger value="analyzer" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
-                <FileSearch className="w-4 h-4" /> AI Analyzer
-              </TabsTrigger>
-              <TabsTrigger value="analysis" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
-                <Activity className="w-4 h-4" /> Analysis
+              <TabsTrigger value="report-analyzer" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
+                <FileSearch className="w-4 h-4" /> AI Report Analyzer
               </TabsTrigger>
               <TabsTrigger value="xray" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <Scan className="w-4 h-4" /> X-ray Scanner
               </TabsTrigger>
               <TabsTrigger value="symptoms" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
-                <Stethoscope className="w-4 h-4" /> Triage
+                <Stethoscope className="w-4 h-4" /> AI Symptom Checker
               </TabsTrigger>
               <TabsTrigger value="reminders" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <Bell className="w-4 h-4" /> Reminders
@@ -209,14 +200,15 @@ export default function MedibuddyHome() {
               <DashboardView patientData={patientData} insights={insights} />
             </TabsContent>
 
-            <TabsContent value="analyzer" className="animate-in fade-in duration-500">
+            <TabsContent value="report-analyzer" className="animate-in fade-in duration-500 space-y-8">
               <div className="max-w-4xl mx-auto">
                 <ReportUploader onInsightsExtracted={handleInsights} onXrayDetected={handleXrayDetected} />
               </div>
-            </TabsContent>
-
-            <TabsContent value="analysis" className="animate-in fade-in duration-500">
-              {insights && <AnalysisDashboard insights={insights} patientData={patientData} />}
+              {insights && (
+                <div className="animate-in slide-in-from-bottom-4 duration-700">
+                  <AnalysisDashboard insights={insights} patientData={patientData} />
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="xray" className="animate-in fade-in duration-500">
