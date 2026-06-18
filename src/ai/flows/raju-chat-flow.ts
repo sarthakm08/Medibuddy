@@ -32,13 +32,13 @@ const rajuChatFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await ai.generate({
+      ...commonConfig,
       system: `You are Raju, a friendly and knowledgeable medical assistant chatbot for the Medibuddy app.
       Your tone is empathetic, helpful, and professional. 
       You can answer general health questions, explain medical terms, and provide wellness tips.
       Always remind users that you are an AI and they should consult a real doctor for serious issues.
       Keep your answers concise and easy to understand.`,
       prompt: input.message,
-      config: commonConfig,
       output: { schema: RajuChatOutputSchema },
     });
     

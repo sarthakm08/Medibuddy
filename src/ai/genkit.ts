@@ -1,19 +1,25 @@
-
 import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
 
+/**
+ * Global Genkit instance configured with Google AI plugin.
+ * Uses gemini-1.5-flash for reliable and fast medical content processing.
+ */
 export const ai = genkit({
   plugins: [
     googleAI({
-      apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY,
+      apiKey: process.env.GEMINI_API_KEY,
     }),
   ],
-  model: 'googleai/gemini-flash-latest',
 });
 
-// Configure global safety settings for development to prevent unexpected blocks
-// Especially important for medical/clinical content which can trigger false positives
+/**
+ * Common configuration for medical AI flows.
+ * Relaxing safety settings is critical for healthcare apps as clinical
+ * descriptions often trigger false positives for 'Dangerous Content'.
+ */
 export const commonConfig = {
+  model: googleAI.model('gemini-1.5-flash'),
   safetySettings: [
     {
       category: 'HARM_CATEGORY_HATE_SPEECH',
