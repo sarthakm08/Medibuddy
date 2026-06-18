@@ -7,7 +7,7 @@
  * - SymptomCheckerOutput - The return type for the symptom checker.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, commonConfig } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const SymptomCheckerInputSchema = z.object({
@@ -33,6 +33,7 @@ const symptomCheckerPrompt = ai.definePrompt({
   name: 'symptomCheckerPrompt',
   input: { schema: SymptomCheckerInputSchema },
   output: { schema: SymptomCheckerOutputSchema },
+  config: commonConfig,
   prompt: `You are an AI medical triaging assistant. Analyze the symptoms provided and suggest possible conditions.
     
 Symptoms: {{{symptoms}}}

@@ -3,7 +3,7 @@
  * @fileOverview Raju - The friendly health assistant chatbot flow.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, commonConfig } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const RajuChatInputSchema = z.object({
@@ -38,8 +38,14 @@ const rajuChatFlow = ai.defineFlow(
       Always remind users that you are an AI and they should consult a real doctor for serious issues.
       Keep your answers concise and easy to understand.`,
       prompt: input.message,
+      config: commonConfig,
       output: { schema: RajuChatOutputSchema },
     });
-    return output!;
+    
+    if (!output) {
+      return { reply: "I'm sorry, I'm having a little trouble processing that. Could you try rephrasing?" };
+    }
+    
+    return output;
   }
 );
