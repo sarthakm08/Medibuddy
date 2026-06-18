@@ -24,7 +24,6 @@ import {
   MessageCircle,
   Loader2,
   Sparkles,
-  RefreshCw,
   BellRing
 } from 'lucide-react';
 import Image from 'next/image';
@@ -35,25 +34,15 @@ import { collection, doc, addDoc, deleteDoc, updateDoc } from 'firebase/firestor
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
-interface Reminder {
-  id: string;
-  name: string;
-  type: 'pill' | 'syrup';
-  amount: string;
-  time: string;
-  imageUrl?: string | null;
-  taken: boolean;
-}
-
 export function MedicineReminder() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user } = useUser();
-  const userId = user?.uid || 'demo-user';
+  const userId = user?.uid;
 
-  // Use Firestore for persistence
+  // Use Firestore for persistence only if authenticated
   const remindersCollection = useMemo(() => 
-    firestore ? collection(firestore, 'users', userId, 'reminders') : null, 
+    (firestore && userId) ? collection(firestore, 'users', userId, 'reminders') : null, 
     [firestore, userId]
   );
   
@@ -78,12 +67,10 @@ export function MedicineReminder() {
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
   const notifiedReminders = useRef<Set<string>>(new Set());
 
-  // Adherence calculation
   const adherence = reminders.length > 0 
     ? Math.round((reminders.filter(r => r.taken).length / reminders.length) * 100) 
     : 0;
 
-  // Handle browser notification permissions
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setPermissionStatus(Notification.permission);
@@ -112,11 +99,6 @@ export function MedicineReminder() {
         title: "Notifications Enabled",
         description: "You will now receive alerts for your medications.",
       });
-      // Test notification
-      new Notification("Medibuddy", {
-        body: "Browser notifications are now active!",
-        icon: "/shield-plus.png" // Fallback icon path
-      });
     } else {
       setSmartFeatures(prev => ({ ...prev, browserNotifications: false }));
       toast({
@@ -127,7 +109,6 @@ export function MedicineReminder() {
     }
   };
 
-  // Background check for upcoming reminders
   useEffect(() => {
     if (!smartFeatures.browserNotifications || permissionStatus !== 'granted') return;
 
@@ -136,16 +117,14 @@ export function MedicineReminder() {
       const currentHHmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       
       reminders.forEach(reminder => {
-        // Trigger if time matches, not taken, and not already notified this session
         if (reminder.time === currentHHmm && !reminder.taken && !notifiedReminders.current.has(reminder.id)) {
           new Notification("Medication Reminder", {
             body: `It's time to take ${reminder.amount} ${reminder.type === 'pill' ? 'pill(s)' : 'ml'} of ${reminder.name}.`,
-            tag: reminder.id, // Group same reminders
+            tag: reminder.id,
             requireInteraction: true
           });
           notifiedReminders.current.add(reminder.id);
           
-          // Toast fallback for internal app visibility
           toast({
             title: "Time for Medication!",
             description: `Dose: ${reminder.name} (${reminder.amount})`,
@@ -153,11 +132,10 @@ export function MedicineReminder() {
         }
       });
 
-      // Clear the "already notified" set at midnight to allow re-notification next day
       if (currentHHmm === "00:00") {
         notifiedReminders.current.clear();
       }
-    }, 30000); // Check every 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [reminders, smartFeatures.browserNotifications, permissionStatus, toast]);
@@ -206,17 +184,21 @@ export function MedicineReminder() {
       }
     } catch (error) {
       console.error(error);
-      toast({
-        title: "Error",
-        description: "An error occurred during AI detection.",
-        variant: "destructive"
-      });
     } finally {
       setIsDetecting(false);
     }
   };
 
   const addReminder = () => {
+    if (!userId) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to save reminders to your profile.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!formData.name || !formData.amount || !formData.time) {
       toast({
         title: "Missing Info",
@@ -449,7 +431,12 @@ export function MedicineReminder() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            {reminders.length > 0 ? (
+            {!userId ? (
+              <div className="text-center py-24 text-muted-foreground border-2 border-dashed border-white/10 rounded-xl">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                <p className="text-sm font-medium">Sign in to view and manage your medication schedule.</p>
+              </div>
+            ) : reminders.length > 0 ? (
               reminders.map(r => (
                 <div key={r.id} className={`flex items-center justify-between p-4 glass-dark rounded-xl border border-white/10 shadow-sm group transition-all hover:bg-white/5 ${r.taken ? 'opacity-50' : 'opacity-100'}`}>
                   <div className="flex items-center gap-4">

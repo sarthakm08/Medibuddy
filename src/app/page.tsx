@@ -24,15 +24,12 @@ import {
   Sparkles,
   Heart,
   ShieldAlert,
-  Phone,
-  ArrowUpCircle
+  Phone
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useDoc, useUser } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -60,10 +57,11 @@ const INITIAL_PATIENT_DATA: PatientData = {
 export default function MedibuddyHome() {
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { user } = useUser();
+  const { user, loading: authLoading } = useUser();
   
-  const userId = user?.uid || 'demo-user';
-  const profileRef = useMemo(() => firestore ? doc(firestore, 'users', userId) : null, [firestore, userId]);
+  // Only attempt to fetch the profile if we have an authenticated user ID
+  const userId = user?.uid;
+  const profileRef = useMemo(() => (firestore && userId) ? doc(firestore, 'users', userId) : null, [firestore, userId]);
   const { data: remoteProfile } = useDoc(profileRef);
 
   const [patientData, setPatientData] = useState<PatientData>(INITIAL_PATIENT_DATA);
@@ -172,7 +170,7 @@ export default function MedibuddyHome() {
           {/* Welcome Banner */}
           <section className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-700">
             <h2 className="text-3xl font-headline font-bold text-white drop-shadow-md">
-              Welcome back, {patientData.name || 'Patient'}
+              Welcome back, {patientData.name || (authLoading ? '...' : (user ? 'Patient' : 'Guest'))}
             </h2>
             <p className="text-muted-foreground font-medium">Your intelligent health companion and emergency workspace.</p>
           </section>

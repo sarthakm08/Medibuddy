@@ -44,11 +44,11 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "UserProfile",
-      "description": "Stores individual user profile data."
+      "description": "Stores individual user profile data. Rules should allow users to read/write their own profiles."
     },
     "/users/{userId}/reminders/{reminderId}": {
       "schema": "Reminder",
-      "description": "Stores medicine reminders for a specific user."
+      "description": "Stores medicine reminders for a specific user. Rules should allow users to manage their own medication list."
     }
   }
 }
