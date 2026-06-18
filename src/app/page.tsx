@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -10,6 +9,8 @@ import { SymptomChecker } from '@/components/symptom-checker';
 import { MedicineReminder } from '@/components/medicine-reminder';
 import { RajuChatbot } from '@/components/raju-chatbot';
 import { AnimatedBackground } from '@/components/animated-background';
+import { FallDetection } from '@/components/fall-detection';
+import { DashboardView } from '@/components/dashboard-view';
 import { ExtractMedicalReportInsightsOutput } from '@/ai/flows/extract-medical-report-insights-flow';
 import { 
   ShieldPlus, 
@@ -73,7 +74,7 @@ export default function MedibuddyHome() {
   }, [remoteProfile]);
 
   const [insights, setInsights] = useState<ExtractMedicalReportInsightsOutput | null>(null);
-  const [activeTab, setActiveTab] = useState('analyzer');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [prefilledXrayUri, setPrefilledXrayUri] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -98,7 +99,7 @@ export default function MedibuddyHome() {
     if (value === 'analysis' && !insights) {
       toast({
         title: "Medical Report Required",
-        description: "Kindly upload a medical report first.",
+        description: "Kindly upload a medical report first in the Analyzer tab.",
         variant: "destructive",
       });
       return;
@@ -135,6 +136,7 @@ export default function MedibuddyHome() {
   return (
     <div className="min-h-screen relative">
       <AnimatedBackground />
+      <FallDetection />
       
       {/* Header */}
       <header className="sticky top-0 z-50 w-full glass h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 no-print border-b border-white/10">
@@ -178,112 +180,38 @@ export default function MedibuddyHome() {
             <h2 className="text-3xl font-headline font-bold text-white drop-shadow-md">
               Welcome back, {patientData.name || 'Patient'}
             </h2>
-            <p className="text-muted-foreground font-medium">Manage your medical reports and health parameters in one intelligent workspace.</p>
+            <p className="text-muted-foreground font-medium">Your intelligent health companion and emergency workspace.</p>
           </section>
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 glass p-1 rounded-2xl shadow-2xl border-white/10 mb-8 no-print h-14">
+            <TabsList className="grid w-full grid-cols-6 glass p-1 rounded-2xl shadow-2xl border-white/10 mb-8 no-print h-14">
+              <TabsTrigger value="dashboard" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
+                <LayoutDashboard className="w-4 h-4" /> Dashboard
+              </TabsTrigger>
               <TabsTrigger value="analyzer" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
-                <FileSearch className="w-4 h-4" /> Analyzer
+                <FileSearch className="w-4 h-4" /> AI Analyzer
               </TabsTrigger>
               <TabsTrigger value="analysis" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
-                <Activity className="w-4 h-4" /> Health Analysis
+                <Activity className="w-4 h-4" /> Analysis
               </TabsTrigger>
               <TabsTrigger value="xray" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
-                <Scan className="w-4 h-4" /> X-ray Analyzer
+                <Scan className="w-4 h-4" /> X-ray Scanner
               </TabsTrigger>
               <TabsTrigger value="symptoms" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
-                <Stethoscope className="w-4 h-4" /> Symptom Checker
+                <Stethoscope className="w-4 h-4" /> Triage
               </TabsTrigger>
               <TabsTrigger value="reminders" className="gap-2 font-bold data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl transition-all h-full">
                 <Bell className="w-4 h-4" /> Reminders
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="analyzer" className="space-y-8 animate-in fade-in duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-                {/* Left Column: Patient Overview */}
-                <div className="md:col-span-4 space-y-6">
-                  <Card className="glass-morphism border-none">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
-                          <LayoutDashboard className="w-5 h-5" />
-                          Dashboard
-                        </CardTitle>
-                        <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest text-primary border-primary/20 bg-white/5">Active Profile</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Age</p>
-                          <p className="text-xl font-bold text-white">{patientData.age || '--'} <span className="text-sm font-normal text-muted-foreground">yrs</span></p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Blood Group</p>
-                          <p className="text-xl font-bold text-white flex items-center gap-1">
-                            <Heart className="w-4 h-4 text-destructive" /> {patientData.bloodGroup || '--'}
-                          </p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Weight</p>
-                          <p className="text-xl font-bold text-white">{patientData.weight || '--'} <span className="text-sm font-normal text-muted-foreground">kg</span></p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sex</p>
-                          <p className="text-xl font-bold capitalize text-white">{patientData.sex || '--'}</p>
-                        </div>
-                      </div>
+            <TabsContent value="dashboard" className="animate-in fade-in duration-500">
+              <DashboardView patientData={patientData} insights={insights} />
+            </TabsContent>
 
-                      {patientData.nomineeName && (
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <p className="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-1">
-                            <ShieldAlert className="w-3 h-3" /> Emergency Nominee
-                          </p>
-                          <div className="mt-2">
-                            <p className="text-sm font-bold text-white">{patientData.nomineeName}</p>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                              <Phone className="w-3 h-3" /> {patientData.nomineePhoneNumber || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm font-semibold p-2 rounded-xl hover:bg-white/10 transition-colors">
-                          <div className="w-2 h-2 rounded-full bg-destructive shadow-sm" />
-                          <span className="text-white">Allergies: <span className="font-normal text-muted-foreground">{patientData.allergies || 'None'}</span></span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm font-semibold p-2 rounded-xl hover:bg-white/10 transition-colors">
-                          <div className="w-2 h-2 rounded-full bg-secondary shadow-sm" />
-                          <span className="text-white">Conditions: <span className="font-normal text-muted-foreground">{patientData.chronicConditions || 'None'}</span></span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="glass border-white/10 shadow-inner">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 bg-primary/10 rounded-xl">
-                          <Sparkles className="w-5 h-5 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <h4 className="font-bold text-sm text-white">Pro Tip</h4>
-                          <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-                            Upload your latest blood panel or diagnostic report to see an AI-powered medication interaction check.
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Right Column: Uploader */}
-                <div className="md:col-span-8">
-                  <ReportUploader onInsightsExtracted={handleInsights} onXrayDetected={handleXrayDetected} />
-                </div>
+            <TabsContent value="analyzer" className="animate-in fade-in duration-500">
+              <div className="max-w-4xl mx-auto">
+                <ReportUploader onInsightsExtracted={handleInsights} onXrayDetected={handleXrayDetected} />
               </div>
             </TabsContent>
 
@@ -310,7 +238,7 @@ export default function MedibuddyHome() {
 
       <footer className="mt-20 py-8 glass border-t-white/10 text-center text-xs text-muted-foreground no-print relative z-10">
         <div className="container mx-auto px-4 flex flex-col items-center gap-4">
-          <p className="font-medium text-white/80"><strong>Medical Disclaimer:</strong> Medibuddy is an AI assistant for informational purposes only. It is not a substitute for professional medical advice.</p>
+          <p className="font-medium text-white/80"><strong>Clinical Disclaimer:</strong> Medibuddy is an AI clinical assistant. Fall detection and SOS features require active internet and sensor permissions.</p>
           <p className="opacity-70">&copy; 2024 Medibuddy AI Assistant • Patient-First Healthcare</p>
         </div>
       </footer>
