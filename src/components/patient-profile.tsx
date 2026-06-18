@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, Activity, AlertCircle, Phone, History, Venus, Mars, MapPin, Camera, X } from 'lucide-react';
+import { User, Activity, AlertCircle, Phone, History, Venus, Mars, MapPin, Camera, X, Heart, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
@@ -21,6 +21,9 @@ export interface PatientData {
   chronicConditions: string;
   accidentHistory: string;
   profilePhoto?: string | null;
+  bloodGroup: string;
+  nomineeName: string;
+  nomineePhoneNumber: string;
 }
 
 interface PatientProfileProps {
@@ -56,7 +59,6 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Helper to prevent non-integer input for age and weight
   const preventNonInteger = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === '.' || e.key === 'e' || e.key === '-' || e.key === '+') {
       e.preventDefault();
@@ -124,7 +126,7 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="age">Age</Label>
             <Input 
@@ -139,6 +141,29 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
               placeholder="35" 
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="bloodGroup" className="flex items-center gap-1">
+              <Heart className="w-3 h-3 text-destructive" /> Blood Group
+            </Label>
+            <Select value={data.bloodGroup} onValueChange={(val) => handleSelectChange('bloodGroup', val)}>
+              <SelectTrigger id="bloodGroup">
+                <SelectValue placeholder="Select Blood Group" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A+">A+</SelectItem>
+                <SelectItem value="A-">A-</SelectItem>
+                <SelectItem value="B+">B+</SelectItem>
+                <SelectItem value="B-">B-</SelectItem>
+                <SelectItem value="O+">O+</SelectItem>
+                <SelectItem value="O-">O-</SelectItem>
+                <SelectItem value="AB+">AB+</SelectItem>
+                <SelectItem value="AB-">AB-</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="sex" className="flex items-center gap-1">
               Sex
@@ -170,6 +195,12 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
               placeholder="70" 
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="height" className="flex items-center gap-1">
+              <Activity className="w-3 h-3" /> Height (cm)
+            </Label>
+            <Input id="height" name="height" type="number" value={data.height} onChange={handleChange} placeholder="175" />
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -186,26 +217,34 @@ export function PatientProfile({ data, onChange }: PatientProfileProps) {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="height" className="flex items-center gap-1">
-              <Activity className="w-3 h-3" /> Height (cm)
-            </Label>
-            <Input id="height" name="height" type="number" value={data.height} onChange={handleChange} placeholder="175" />
+        <div className="border-t border-white/10 pt-6">
+          <h4 className="text-sm font-bold flex items-center gap-2 mb-4 text-primary">
+            <ShieldAlert className="w-4 h-4" /> Emergency Contact (Nominee)
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nomineeName">Nominee Name</Label>
+              <Input id="nomineeName" name="nomineeName" value={data.nomineeName} onChange={handleChange} placeholder="Guardian Name" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="nomineePhoneNumber">Nominee Phone</Label>
+              <Input id="nomineePhoneNumber" name="nomineePhoneNumber" type="tel" value={data.nomineePhoneNumber} onChange={handleChange} placeholder="+1 (555) 999-9999" />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="allergies" className="flex items-center gap-1 text-destructive">
-              <AlertCircle className="w-3 h-3" /> Allergies
-            </Label>
-            <Textarea 
-              id="allergies" 
-              name="allergies" 
-              value={data.allergies} 
-              onChange={handleChange} 
-              placeholder="List any known allergies (e.g., Penicillin, Peanuts)" 
-              className="min-h-[60px]"
-            />
-          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="allergies" className="flex items-center gap-1 text-destructive">
+            <AlertCircle className="w-3 h-3" /> Allergies
+          </Label>
+          <Textarea 
+            id="allergies" 
+            name="allergies" 
+            value={data.allergies} 
+            onChange={handleChange} 
+            placeholder="List any known allergies (e.g., Penicillin, Peanuts)" 
+            className="min-h-[60px]"
+          />
         </div>
 
         <div className="space-y-2">

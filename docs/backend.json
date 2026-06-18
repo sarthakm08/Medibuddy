@@ -16,7 +16,10 @@
         "allergies": { "type": "string" },
         "chronicConditions": { "type": "string" },
         "accidentHistory": { "type": "string" },
-        "profilePhoto": { "type": "string" }
+        "profilePhoto": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "nomineeName": { "type": "string" },
+        "nomineePhoneNumber": { "type": "string" }
       }
     },
     "Reminder": {

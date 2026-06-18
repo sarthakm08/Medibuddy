@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -19,7 +20,10 @@ import {
   FileSearch,
   Activity,
   Bell,
-  Sparkles
+  Sparkles,
+  Heart,
+  ShieldAlert,
+  Phone
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -45,7 +49,10 @@ const INITIAL_PATIENT_DATA: PatientData = {
   allergies: '',
   chronicConditions: '',
   accidentHistory: '',
-  profilePhoto: null
+  profilePhoto: null,
+  bloodGroup: '',
+  nomineeName: '',
+  nomineePhoneNumber: ''
 };
 
 export default function MedibuddyHome() {
@@ -103,6 +110,7 @@ export default function MedibuddyHome() {
     setPatientData(updatedData);
     if (profileRef) {
       const dataToSave = { ...updatedData };
+      // Sanitize undefined values to null for Firestore
       Object.keys(dataToSave).forEach(key => {
         const k = key as keyof PatientData;
         if (dataToSave[k] === undefined) {
@@ -213,6 +221,12 @@ export default function MedibuddyHome() {
                           <p className="text-xl font-bold text-white">{patientData.age || '--'} <span className="text-sm font-normal text-muted-foreground">yrs</span></p>
                         </div>
                         <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Blood Group</p>
+                          <p className="text-xl font-bold text-white flex items-center gap-1">
+                            <Heart className="w-4 h-4 text-destructive" /> {patientData.bloodGroup || '--'}
+                          </p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Weight</p>
                           <p className="text-xl font-bold text-white">{patientData.weight || '--'} <span className="text-sm font-normal text-muted-foreground">kg</span></p>
                         </div>
@@ -220,11 +234,21 @@ export default function MedibuddyHome() {
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sex</p>
                           <p className="text-xl font-bold capitalize text-white">{patientData.sex || '--'}</p>
                         </div>
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Height</p>
-                          <p className="text-xl font-bold text-white">{patientData.height || '--'} <span className="text-sm font-normal text-muted-foreground">cm</span></p>
-                        </div>
                       </div>
+
+                      {patientData.nomineeName && (
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+                          <p className="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-1">
+                            <ShieldAlert className="w-3 h-3" /> Emergency Nominee
+                          </p>
+                          <div className="mt-2">
+                            <p className="text-sm font-bold text-white">{patientData.nomineeName}</p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Phone className="w-3 h-3" /> {patientData.nomineePhoneNumber || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm font-semibold p-2 rounded-xl hover:bg-white/10 transition-colors">
