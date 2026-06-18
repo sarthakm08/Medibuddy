@@ -57,7 +57,7 @@ export async function extractMedicalReportInsights(
   return extractMedicalReportInsightsFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const extractMedicalReportInsightsPrompt = ai.definePrompt({
   name: 'extractMedicalReportInsightsPrompt',
   input: { schema: ExtractMedicalReportInsightsInputSchema },
   output: { schema: ExtractMedicalReportInsightsOutputSchema },
@@ -82,7 +82,7 @@ const extractMedicalReportInsightsFlow = ai.defineFlow(
     outputSchema: ExtractMedicalReportInsightsOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const { output } = await extractMedicalReportInsightsPrompt(input);
     return output!;
   }
 );
