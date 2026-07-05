@@ -3,7 +3,7 @@ import { googleAI } from '@genkit-ai/google-genai';
 
 /**
  * Global Genkit instance configured with Google AI plugin.
- * Uses gemini-1.5-flash as the default model for all flows.
+ * Uses gemini-flash-latest as the preferred alias for all flows.
  */
 export const ai = genkit({
   plugins: [
@@ -11,7 +11,7 @@ export const ai = genkit({
       apiKey: process.env.GEMINI_API_KEY,
     }),
   ],
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-flash-latest'),
 });
 
 /**
